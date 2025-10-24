@@ -35,5 +35,53 @@ class RoomController extends Controller
             'data'    => $room
         ], 201);
     }
+    // Lấy chi tiết 1 phòng theo id
+    public function show_by_id($id)
+    {
+        $room = Room::find($id);
+        if (!$room) {
+            return response()->json(['message' => 'Room not found'], 404);
+        }
+        return response()->json($room);
+    }
+    // Sửa thông tin phòng
+    public function update(Request $request, $id)
+    {
+        $room = Room::find($id);
+        if (!$room) {
+            return response()->json(['message' => 'Room not found'], 404);
+        }
 
+        $validated = $request->validate([
+            'room_type_id' => 'sometimes|integer',
+            'room_name'    => 'sometimes|string|max:255',
+            'description'  => 'nullable|string',
+            'price'        => 'sometimes|numeric',
+            'status'       => 'sometimes|string|in:Còn phòng,Đã có người,Bảo trì',
+        ]);
+
+        $room->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Room updated successfully',
+            'data'    => $room
+        ]);
+    }
+
+    // Xoá phòng
+    public function destroy($id)
+    {
+        $room = Room::find($id);
+        if (!$room) {
+            return response()->json(['message' => 'Room not found'], 404);
+        }
+
+        $room->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Room deleted successfully'
+        ]);
+    }
 }
