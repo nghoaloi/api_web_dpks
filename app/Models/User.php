@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
 
     protected $table = 'users';
@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role',
         'gender',
         'address',
+        'status'
     ];
 
     //  Ẩn các trường khi trả về JSON
@@ -42,7 +43,7 @@ class User extends Authenticatable
     public function bookings()
 {
     //1 user có nhiều lần đặt phòng
-    return $this->hasMany(\App\Models\Bookings::class, 'user_id', 'id');
+    return $this->hasMany(Booking::class, 'user_id', 'id');
 }
 
 }

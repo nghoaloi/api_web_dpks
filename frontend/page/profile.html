@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - Hotel Booking</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <h1><i class="fas fa-user"></i> Thông tin cá nhân</h1>
+                </div>
+
+                <div class="profile-content">
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Họ và tên:</label>
+                            <span id="fullname">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="email">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Số điện thoại:</label>
+                            <span id="phone">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Giới tính:</label>
+                            <span id="gender">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Địa chỉ:</label>
+                            <span id="address">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadHeader() {
+            try {
+                const response = await fetch('../components/header.html');
+                const headerHTML = await response.text();
+                
+                const headerContainer = document.getElementById('header-container');
+                if (headerContainer) {
+                    headerContainer.innerHTML = headerHTML;
+                    
+                    initializeHeader();
+                }
+            } catch (error) {
+                console.error('Error loading header:', error);
+            }
+        }
+
+
+        function initializeHeader() {
+            const token = localStorage.getItem('auth_token');
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            
+            if (token && userData) {
+
+                showUserAccount(userData);
+            } else {
+
+                showAuthButtons();
+            }
+            
+            setupHeaderEventListeners();
+        }
+
+        function showUserAccount(userData) {
+            const userAccount = document.getElementById('user-account');
+            const authButtons = document.getElementById('auth-buttons');
+            const mobileUserAccount = document.getElementById('mobile-user-account');
+            const mobileAuth = document.getElementById('mobile-auth');
+            
+            if (userAccount) {
+                userAccount.style.display = 'block';
+                document.getElementById('user-name').textContent = userData.fullname || userData.email || 'Tài khoản';
+            }
+            
+            if (authButtons) {
+                authButtons.style.display = 'none';
+            }
+            
+            if (mobileUserAccount) {
+                mobileUserAccount.style.display = 'block';
+                document.getElementById('mobile-user-name').textContent = userData.fullname || userData.email || 'Tài khoản';
+            }
+            
+            if (mobileAuth) {
+                mobileAuth.style.display = 'none';
+            }
+        }
+
+        function showAuthButtons() {
+            const userAccount = document.getElementById('user-account');
+            const authButtons = document.getElementById('auth-buttons');
+            const mobileUserAccount = document.getElementById('mobile-user-account');
+            const mobileAuth = document.getElementById('mobile-auth');
+            
+            if (userAccount) {
+                userAccount.style.display = 'none';
+            }
+            
+            if (authButtons) {
+                authButtons.style.display = 'flex';
+            }
+            
+            if (mobileUserAccount) {
+                mobileUserAccount.style.display = 'none';
+            }
+            
+            if (mobileAuth) {
+                mobileAuth.style.display = 'flex';
+            }
+        }
+
+
+        function setupHeaderEventListeners() {
+          
+            const userAccount = document.getElementById('user-account');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            if (userAccount && userDropdown) {
+                userAccount.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userAccount.contains(e.target)) {
+                        userDropdown.classList.remove('active');
+                    }
+                });
+            }
+            
+
+            const logoutBtn = document.getElementById('logout-btn');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+            
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+            
+            if (mobileLogoutBtn) {
+                mobileLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+            
+
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const closeMenuBtn = document.getElementById('close-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                });
+            }
+            
+            if (closeMenuBtn && mobileMenu) {
+                closeMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                });
+            }
+            
+
+            if (mobileMenu) {
+                mobileMenu.addEventListener('click', function(e) {
+                    if (e.target === mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        async function logout() {
+            const token = localStorage.getItem('auth_token');
+            
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:8000/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+
+                        localStorage.removeItem('auth_token');
+                        localStorage.removeItem('userData');
+
+                        window.location.href = 'login.html';
+                    } else {
+                        throw new Error('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('userData');
+                    window.location.href = 'login.html';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHeader();
+        });
+    </script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>
