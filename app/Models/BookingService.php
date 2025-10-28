@@ -12,10 +12,13 @@ class BookingService extends Model
     protected $table = 'booking_service';
 
     protected $fillable = [
+        'id',
         'booking_id',
         'service_id',
         'quantity',
         'price',
+        'created_at',
+        'updated_at'
     ];
 
     public function booking()

@@ -12,9 +12,12 @@ class Service extends Model
     protected $table = 'services';
 
     protected $fillable = [
+        'id',
         'service_name',
         'price',
         'description',
+        'created_at',
+        'updated_at'
     ];
 
     public function bookingServices()
