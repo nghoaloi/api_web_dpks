@@ -12,20 +12,15 @@ class Room extends Model
     protected $table = 'rooms';
 
     protected $fillable = [
-        'room_type_id',
-        'room_name',
-        'description',
-        'price',
+        'type_id',
+        'room_number',
         'status',
-    ];
-
-    protected $casts = [
-        'price' => 'float',
     ];
 
     public function roomType()
     {
-        return $this->belongsTo(RoomType::class, 'room_type_id');
+        // Liên kết tới bảng room_types (khóa ngoại là type_id)
+        return $this->belongsTo(RoomType::class, 'type_id');
     }
 
     public function images()

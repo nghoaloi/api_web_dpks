@@ -12,12 +12,26 @@ class RoomType extends Model
     protected $table = 'room_types';
 
     protected $fillable = [
-        'type_name',
+        'name',
+        'base_price',
         'description',
+        'max_cap',
+        'payment_type',
+        'allow_pet',
+        'single_bed',
+        'double_bed',
+    ];
+
+    protected $casts = [
+        'base_price' => 'float',
+        'max_cap' => 'integer',
+        'single_bed' => 'integer',
+        'double_bed' => 'integer',
     ];
 
     public function rooms()
     {
-        return $this->hasMany(Room::class, 'room_type_id');
+        // Khóa ngoại trong bảng rooms là "type_id"
+        return $this->hasMany(Room::class, 'type_id');
     }
 }

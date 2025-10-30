@@ -16,6 +16,13 @@ use Illuminate\Support\Facades\Route;
         Route::put('/profile',[AuthController::class,'updateProfile']);
         Route::post('/logout',[AuthController::class,'logout']);
     });
-
+    //room
+    use App\Http\Controllers\RoomController;
+    Route::get('/rooms', [RoomController::class, 'index']);       // Lấy danh sách
+    Route::post('/rooms', [RoomController::class, 'store']);      // Thêm phòng
+    Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']);   // Chi tiết phòng
+    Route::put('/rooms/{id}', [RoomController::class, 'update']); // Sửa phòng
+    Route::delete('/rooms/{id}', [RoomController::class, 'destroy']); // Xoá phòng
+    //roomtype
     Route::get('/room-types',[RoomTypeController::class,'index']);
 ?>

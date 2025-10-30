@@ -7,56 +7,61 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    // Lấy tất cả các phòng
+    //  Lấy danh sách tất cả phòng
     public function index()
     {
-        // Eager load (load kèm dữ liệu liên quan nếu muốn)
-        $rooms = Room::all();
-        return response()->json($rooms);
+        // load thêm loại phòng để xem thông tin chi tiết
+        $rooms = Room::with('roomType')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $rooms
+        ]);
     }
-    // Thêm 1 phòng mới
+
+    //  Thêm 1 phòng mới
     public function store(Request $request)
     {
-        // Validate dữ liệu gửi lên
         $validated = $request->validate([
-            'room_type_id' => 'required|integer',
-            'room_name'    => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'price'        => 'required|numeric',
+            'type_id'      => 'required|integer|exists:room_types,id',
+            'room_number'  => 'required|string|max:255',
             'status'       => 'required|string|in:Còn phòng,Đã có người,Bảo trì',
         ]);
 
-        // Tạo room
         $room = Room::create($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Room created successfully',
+            'message' => 'Phòng đã được thêm thành công!',
             'data'    => $room
         ], 201);
     }
-    // Lấy chi tiết 1 phòng theo id
+
+    // 🟢 Lấy chi tiết 1 phòng theo ID
     public function show_by_id($id)
     {
-        $room = Room::find($id);
+        $room = Room::with('roomType')->find($id);
+
         if (!$room) {
-            return response()->json(['message' => 'Room not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy phòng'], 404);
         }
-        return response()->json($room);
+
+        return response()->json([
+            'success' => true,
+            'data' => $room
+        ]);
     }
-    // Sửa thông tin phòng
+
+    // 🟢 Cập nhật thông tin phòng
     public function update(Request $request, $id)
     {
         $room = Room::find($id);
         if (!$room) {
-            return response()->json(['message' => 'Room not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy phòng'], 404);
         }
 
         $validated = $request->validate([
-            'room_type_id' => 'sometimes|integer',
-            'room_name'    => 'sometimes|string|max:255',
-            'description'  => 'nullable|string',
-            'price'        => 'sometimes|numeric',
+            'type_id'      => 'sometimes|integer|exists:room_types,id',
+            'room_number'  => 'sometimes|string|max:255',
             'status'       => 'sometimes|string|in:Còn phòng,Đã có người,Bảo trì',
         ]);
 
@@ -64,24 +69,24 @@ class RoomController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Room updated successfully',
+            'message' => 'Phòng đã được cập nhật!',
             'data'    => $room
         ]);
     }
 
-    // Xoá phòng
+    // 🟢 Xóa phòng
     public function destroy($id)
     {
         $room = Room::find($id);
         if (!$room) {
-            return response()->json(['message' => 'Room not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy phòng'], 404);
         }
 
         $room->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Room deleted successfully'
+            'message' => 'Phòng đã được xóa!'
         ]);
     }
 }
