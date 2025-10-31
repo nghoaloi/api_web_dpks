@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoomTypeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ServiceController;
 
 
     Route::prefix('auth')->group(function(){
@@ -18,11 +19,18 @@ use Illuminate\Support\Facades\Route;
     });
     //room
     use App\Http\Controllers\RoomController;
-    Route::get('/rooms', [RoomController::class, 'index']);       // Lấy danh sách
-    Route::post('/rooms', [RoomController::class, 'store']);      // Thêm phòng
-    Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']);   // Chi tiết phòng
-    Route::put('/rooms/{id}', [RoomController::class, 'update']); // Sửa phòng
-    Route::delete('/rooms/{id}', [RoomController::class, 'destroy']); // Xoá phòng
+    Route::get('/rooms', [RoomController::class, 'index']);       
+    Route::post('/rooms', [RoomController::class, 'store']);    
+    Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
+    Route::put('/rooms/{id}', [RoomController::class, 'update']); 
+    Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
     //roomtype
     Route::get('/room-types',[RoomTypeController::class,'index']);
+
+    //dịch vụ
+    Route::get('/services', [ServiceController::class, 'index']);
+    Route::get('/services/{id}', [ServiceController::class, 'show']);
+    Route::post('/services', [ServiceController::class, 'store']);
+    Route::put('/services', [ServiceController::class, 'update']);
+    Route::delete('/services', [ServiceController::class, 'destroy']);
 ?>

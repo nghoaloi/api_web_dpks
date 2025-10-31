@@ -12,7 +12,7 @@ Route::get('api/bookings', [BookingController::class, 'index']);
 
 //dịch vụ
 
-Route::get('api/services', [ServiceController::class, 'index']);
+
 //loại phòng
 Route::get('api/room-types',[RoomTypeController::class,'index']);
 
