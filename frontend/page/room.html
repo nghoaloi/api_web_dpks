@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết phòng - Hotel Booking</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/room.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <main class="room-detail">
+        <div class="container room-container">
+            <div id="room-gallery" class="room-gallery">
+                <div class="gallery-main">
+                    <img id="main-image" src="../images/background.jpg" alt="room">
+                </div>
+                <div class="gallery-thumbs" id="gallery-thumbs"></div>
+            </div>
+
+            <div class="room-content-grid">
+                <div>
+                    <div class="room-info-section">
+                        <div class="room-header">
+                            <div class="room-title-section">
+                                <h1 id="room-title">Phòng</h1>
+                                <div class="room-number" id="room-number">#—</div>
+                                <div id="room-status" class="room-status"></div>
+                            </div>
+                            <div class="room-price-section">
+                                <div class="price-label">Giá mỗi đêm</div>
+                                <div class="price-value" id="room-price">—</div>
+                                <div class="price-unit">VNĐ</div>
+                            </div>
+                        </div>
+
+                        <div class="room-features" id="room-features"></div>
+
+                        <div class="room-badges" id="room-badges"></div>
+
+                        <div class="room-description">
+                            <h3>Mô tả phòng</h3>
+                            <p id="room-description">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="booking-section">
+                        <h3>Đặt phòng ngay</h3>
+                        <button class="btn-book" id="btn-book">Đặt phòng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/room.js"></script>
+</body>
+</html>
+
+

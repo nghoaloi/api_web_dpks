@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Booking - Đặt phòng khách sạn trực tuyến</title>
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .main-content {
+            margin-top: 0;
+            padding: 40px 0;
+            min-height: 60vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .main-content h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .main-content p {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="main-content">
+        <section class="hero">
+            <div class="container">
+                <h1 class="title"><span id="hero-name">Bạn</span>, kế tiếp bạn sẽ làm gì?</h1>
+                <p class="subtitle">Khám phá phòng đẹp, giá tốt và đặt phòng chỉ trong vài bước</p>
+                <div class="search-bar-wrap">
+                    <div class="search-input">
+                        <i class="fa fa-bed"></i>
+                        <input id="keyword" type="text" placeholder="Loại phòng...">
+                    </div>
+                    <div class="search-input">
+                        <i class="fa fa-calendar"></i>
+                        <input id="checkin" type="date" placeholder="Ngày nhận phòng">
+                    </div>
+                    <div class="search-input">
+                        <i class="fa fa-calendar"></i>
+                        <input id="checkout" type="date" placeholder="Ngày trả phòng">
+                    </div>
+                    <button id="btn-search" class="btn-search search-input"><i class="fa fa-search" style="margin-right:8px"></i>Tìm</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section-title">Phòng nổi bật</div>
+                <div id="rooms-grid" class="rooms-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/header-loader.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>
