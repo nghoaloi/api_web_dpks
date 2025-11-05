@@ -27,7 +27,11 @@ class RoomType extends Model
         'max_cap' => 'integer',
         'single_bed' => 'integer',
         'double_bed' => 'integer',
+        'payment_type' => 'string',
+        'allow_pet' => 'string',
     ];
+
+    public $timestamps = true;
 
     public function rooms()
     {

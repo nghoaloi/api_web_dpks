@@ -36,10 +36,23 @@ class RoomController extends Controller
         ], 201);
     }
 
-    // 🟢 Lấy chi tiết 1 phòng theo ID
+    //  Lấy chi tiết 1 phòng theo ID
+    // public function show_by_id($id)
+    // {
+    //     $room = Room::with('roomType')->find($id);
+
+    //     if (!$room) {
+    //         return response()->json(['message' => 'Không tìm thấy phòng'], 404);
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $room
+    //     ]);
+    // }
     public function show_by_id($id)
     {
-        $room = Room::with('roomType')->find($id);
+        $room = Room::find($id);
 
         if (!$room) {
             return response()->json(['message' => 'Không tìm thấy phòng'], 404);
@@ -51,7 +64,7 @@ class RoomController extends Controller
         ]);
     }
 
-    // 🟢 Cập nhật thông tin phòng
+    //  Cập nhật thông tin phòng
     public function update(Request $request, $id)
     {
         $room = Room::find($id);
@@ -74,7 +87,7 @@ class RoomController extends Controller
         ]);
     }
 
-    // 🟢 Xóa phòng
+    //  Xóa phòng
     public function destroy($id)
     {
         $room = Room::find($id);

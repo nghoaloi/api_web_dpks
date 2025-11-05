@@ -26,11 +26,14 @@ use App\Http\Controllers\ServiceController;
     Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
     //roomtype
     Route::get('/room-types',[RoomTypeController::class,'index']);
-
+    Route::post('/room-types', [RoomTypeController::class, 'store']);    
+    Route::get('/room-types/{id}', [RoomTypeController::class, 'show_by_id']); 
+    Route::put('/room-types/{id}', [RoomTypeController::class, 'update']); 
+    Route::delete('/room-types/{id}', [RoomTypeController::class, 'destroy']);
     //dịch vụ
     Route::get('/services', [ServiceController::class, 'index']);
     Route::get('/services/{id}', [ServiceController::class, 'show']);
     Route::post('/services', [ServiceController::class, 'store']);
-    Route::put('/services', [ServiceController::class, 'update']);
-    Route::delete('/services', [ServiceController::class, 'destroy']);
+    Route::put('/services/{id}', [ServiceController::class, 'update']);
+    Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 ?>
