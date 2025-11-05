@@ -158,6 +158,23 @@
     font-weight: 500;
 }
 
+.room-availability {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #eef1f4;
+}
+
+.availability-simple {
+    font-size: 16px;
+    color: #546b7b;
+}
+
+.availability-simple strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0d47a1;
+}
+
 .room-features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

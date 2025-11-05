@@ -27,6 +27,7 @@ use App\Http\Controllers\ServiceController;
     Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
     //roomtype
     Route::get('/room-types',[RoomTypeController::class,'index']);
+    Route::get('/room-types/{id}',[RoomTypeController::class,'show']);
 
     //room images
     use App\Http\Controllers\RoomImageController;

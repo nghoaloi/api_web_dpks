@@ -9,10 +9,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         const id = new URLSearchParams(location.search).get('id');
         if (!id) {
-            document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Không tìm thấy thông tin phòng</div>';
+            document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Không tìm thấy thông tin loại phòng</div>';
             return;
         }
-        fetchRoom(id);
+        fetchRoomType(id);
         
         const btnBook = document.getElementById('btn-book');
         if (btnBook) {
@@ -23,53 +23,58 @@
                     window.location.href = 'login.html';
                     return;
                 }
-                // TODO: Navigate to booking page
+                // TODO: Navigate to booking page with room type id
                 alert('Chức năng đặt phòng đang được phát triển');
             });
         }
     });
 
-    async function fetchRoom(id){
+    async function fetchRoomType(id){
         try{
-            const res = await fetch(API_BASE + 'rooms/' + encodeURIComponent(id));
+            const res = await fetch(API_BASE + 'room-types/' + encodeURIComponent(id));
             const json = await res.json();
-            const room = json.data || json;
-            if (!room) {
-                document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Không tìm thấy thông tin phòng</div>';
+            const roomType = json.data || json;
+            if (!roomType) {
+                document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Không tìm thấy thông tin loại phòng</div>';
                 return;
             }
-            render(room);
+            render(roomType);
         }catch(e){
-            console.error('Load room failed', e);
-            document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Lỗi khi tải thông tin phòng</div>';
+            console.error('Load room type failed', e);
+            document.querySelector('.room-container').innerHTML = '<div style="text-align:center;padding:40px;">Lỗi khi tải thông tin loại phòng</div>';
         }
     }
 
-    function render(room){
-        const rt = room.roomType || room.room_type || {};
-        
+    function render(roomType){
         // Title
-        document.getElementById('room-title').textContent = rt.name || 'Phòng';
-        document.getElementById('room-number').textContent = 'Phòng #' + (room.room_number || '—');
+        document.getElementById('room-title').textContent = roomType.name || 'Loại phòng';
         
-        // Status
+        // Ẩn số phòng và status vì đây là loại phòng, không phải phòng cụ thể
+        const roomNumberEl = document.getElementById('room-number');
+        if (roomNumberEl) roomNumberEl.style.display = 'none';
+        
         const statusEl = document.getElementById('room-status');
-        const statusClass = room.status === 'Còn phòng' ? 'available' : (room.status === 'Đã có người' ? 'occupied' : 'maintenance');
-        statusEl.textContent = room.status || '—';
-        statusEl.className = 'room-status ' + statusClass;
+        if (statusEl) statusEl.style.display = 'none';
         
         // Price
-        const price = (rt.base_price ?? undefined) !== undefined ? Number(rt.base_price).toLocaleString('vi-VN') : '—';
+        const price = (roomType.base_price ?? undefined) !== undefined ? Number(roomType.base_price).toLocaleString('vi-VN') : '—';
         document.getElementById('room-price').textContent = price;
         
+        //Số phòng trống
+        const availableCount = roomType.available_rooms_count ?? 0;
+        const availabilityEl = document.getElementById('room-availability');
+        if (availabilityEl) {
+            availabilityEl.innerHTML = `<div class="availability-simple">Còn <strong>${availableCount}</strong> phòng trống</div>`;
+        }
+        
         // Images
-        renderGallery(rt.images || []);
+        renderGallery(roomType.images || []);
         
         // Features
         const features = [
-            { icon: 'fa-users', label: 'Tối đa', value: (rt.max_cap ?? '—') + ' người' },
-            { icon: 'fa-bed', label: 'Giường đơn', value: (rt.single_bed ?? 0) + ' giường' },
-            { icon: 'fa-bed', label: 'Giường đôi', value: (rt.double_pet ?? 0) + ' giường' },
+            { icon: 'fa-users', label: 'Tối đa', value: (roomType.max_cap ?? '—') + ' người' },
+            { icon: 'fa-bed', label: 'Giường đơn', value: (roomType.single_bed ?? 0) + ' giường' },
+            { icon: 'fa-bed', label: 'Giường đôi', value: (roomType.double_pet ?? 0) + ' giường' },
         ];
         document.getElementById('room-features').innerHTML = features
             .map(f => `
@@ -84,25 +89,34 @@
         
         // Badges
         const badges = [];
-        if (rt.payment_type) {
-            badges.push({ text: rt.payment_type, class: 'info' });
+        if (roomType.payment_type) {
+            badges.push({ text: roomType.payment_type, class: 'info' });
         }
-        if (rt.allow_pet) {
-            const petClass = rt.allow_pet === 'được mang' ? 'success' : 'warning';
-            badges.push({ text: rt.allow_pet === 'được mang' ? 'Cho phép thú cưng' : 'Không cho thú cưng', class: petClass });
+        if (roomType.allow_pet) {
+            const petClass = roomType.allow_pet === 'được mang' ? 'success' : 'warning';
+            badges.push({ text: roomType.allow_pet === 'được mang' ? 'Cho phép thú cưng' : 'Không cho thú cưng', class: petClass });
         }
         document.getElementById('room-badges').innerHTML = badges
             .map(b => `<span class="badge ${b.class}">${escapeHtml(b.text)}</span>`)
             .join('');
         
         // Description
-        document.getElementById('room-description').textContent = rt.description || 'Chưa có mô tả chi tiết.';
+        document.getElementById('room-description').textContent = roomType.description || 'Chưa có mô tả chi tiết.';
         
-        // Disable book button if occupied or maintenance
+        // Disable book button if no available rooms
         const btnBook = document.getElementById('btn-book');
-        if (btnBook && (room.status === 'Đã có người' || room.status === 'Bảo trì')) {
-            btnBook.disabled = true;
-            btnBook.textContent = room.status === 'Đã có người' ? 'Phòng đã được đặt' : 'Phòng đang bảo trì';
+        if (btnBook) {
+            if (availableCount === 0) {
+                btnBook.disabled = true;
+                btnBook.textContent = 'Đã hết phòng';
+                btnBook.style.opacity = '0.6';
+                btnBook.style.cursor = 'not-allowed';
+            } else {
+                btnBook.disabled = false;
+                btnBook.textContent = 'Đặt phòng';
+                btnBook.style.opacity = '1';
+                btnBook.style.cursor = 'pointer';
+            }
         }
     }
 

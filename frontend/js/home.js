@@ -4,7 +4,7 @@
     }
 
     const state = {
-        rooms: [],
+        roomTypes: [],
         keyword: '',
         guests: '',
         checkIn: '',
@@ -20,26 +20,26 @@
             if (el) el.addEventListener('change', onFilterChange);
         });
 
-        fetchRooms();
+        fetchRoomTypes();
         personalizeHero();
     });
 
-    async function fetchRooms(){
+    async function fetchRoomTypes(){
         try{
-            const res = await fetch(API_BASE + 'rooms');
+            const res = await fetch(API_BASE + 'room-types');
             const json = await res.json();
             if (json && json.data) {
-                state.rooms = Array.isArray(json.data) ? json.data : [];
+                state.roomTypes = Array.isArray(json.data) ? json.data : [];
             } else if (Array.isArray(json)) {
-                state.rooms = json;
+                state.roomTypes = json;
             } else {
-                state.rooms = [];
+                state.roomTypes = [];
             }
             
             renderRooms();
         } catch(e){
-            console.error('Fetch rooms error', e);
-            state.rooms = [];
+            console.error('Fetch room types error', e);
+            state.roomTypes = [];
             renderRooms();
         }
     }
@@ -72,29 +72,23 @@
     function renderRooms(){
         const grid = document.getElementById('rooms-grid');
         if (!grid) return;
-        const filtered = state.rooms.filter(r => {
-            const rt = r.room_type || r.roomType || {};
+        const filtered = state.roomTypes.filter(rt => {
             const name = String(rt.name || '').toLowerCase();
-            const number = String(r.room_number || '').toLowerCase();
-            const keywordOk = !state.keyword || name.includes(state.keyword) || number.includes(state.keyword);
+            const keywordOk = !state.keyword || name.includes(state.keyword);
             const guestsOk = !state.guests || (parseInt(rt.max_cap || 0) >= parseInt(state.guests));
             return keywordOk && guestsOk;
         });
 
-        grid.innerHTML = filtered.map(room => cardHtml(room)).join('');
+        grid.innerHTML = filtered.map(roomType => cardHtml(roomType)).join('');
     }
 
-    function cardHtml(room){
-        const rt = room.room_type || room.roomType || {};
-        const price = (rt.base_price ?? undefined) !== undefined ? Number(rt.base_price).toLocaleString('vi-VN') : '—';
-        const statusClass = room.status === 'Còn phòng' ? 'available' : (room.status === 'Đã có người' ? 'occupied' : 'maintenance');
-        const statusText = room.status || '—';
-        const title = rt.name ? `${rt.name} • #${room.room_number}` : `Phòng #${room.room_number || ''}`;
-        const href = 'page/room.html?id=' + encodeURIComponent(room.id);
-        
+    function cardHtml(roomType){
+        const price = (roomType.base_price ?? undefined) !== undefined ? Number(roomType.base_price).toLocaleString('vi-VN') : '—';
+        const title = roomType.name || 'Loại phòng';
+        const href = 'page/room.html?id=' + encodeURIComponent(roomType.id);
 
         let imageUrl = 'images/background.jpg'; 
-        const images = rt.images || [];
+        const images = roomType.images || [];
         
         if (images && Array.isArray(images) && images.length > 0) {
             const firstImage = images[0];
@@ -120,11 +114,10 @@
           +   '<img class="room-thumb" src="'+ escapeHtml(imageUrl) +'" alt="room" />'
           +   '<div class="room-body">'
           +       '<div class="room-title">'+ escapeHtml(title) +'</div>'
-          +       '<div class="room-meta">Tối đa: '+ ((rt.max_cap ?? '—')) +' người</div>'
+          +       '<div class="room-meta">Tối đa: '+ ((roomType.max_cap ?? '—')) +' người</div>'
           +   '</div>'
           +   '<div class="room-footer">'
           +       '<div class="price">'+ (price !== '—' ? (price + ' đ') : 'Liên hệ') +'</div>'
-          +       '<div class="status '+statusClass+'">'+ escapeHtml(statusText) +'</div>'
           +   '</div>'
           + '</a>'
         );

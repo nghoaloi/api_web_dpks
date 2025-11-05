@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RoomType;
+use App\Models\Room;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -14,15 +15,17 @@ class RoomTypeController extends Controller
     public function index()
     {
         try{
-            $roomtype=RoomType::query()
-            ->latest()
-            ->get();
+            $roomtype = RoomType::with('images')
+                ->latest()
+                ->get();
             return response()->json([
-                'data'=>$roomtype
-            ],200);
+                'success' => true,
+                'data' => $roomtype
+            ], 200);
         }
         catch(\Exception $e){
             return response()->json([
+                'success' => false,
                 'message'=>'Lỗi lấy danh sách loại phòng',
                 'error'=>$e->getMessage()
             ],500);
@@ -50,7 +53,40 @@ class RoomTypeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $roomType = RoomType::with('images')->find($id);
+            
+            if (!$roomType) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy loại phòng'
+                ], 404);
+            }
+
+            // Đếm số phòng trống của loại phòng này
+            $availableRoomsCount = Room::where('type_id', $id)
+                ->where('status', 'Còn phòng')
+                ->count();
+            
+            // Tổng số phòng của loại này
+            $totalRoomsCount = Room::where('type_id', $id)->count();
+
+            // Thêm thông tin số phòng vào response
+            $roomTypeData = $roomType->toArray();
+            $roomTypeData['available_rooms_count'] = $availableRoomsCount;
+            $roomTypeData['total_rooms_count'] = $totalRoomsCount;
+
+            return response()->json([
+                'success' => true,
+                'data' => $roomTypeData
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi lấy thông tin loại phòng',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
