@@ -19,12 +19,8 @@ class Room extends Model
 
     public function roomType()
     {
-        // Liên kết tới bảng room_types (khóa ngoại là type_id)
         return $this->belongsTo(RoomType::class, 'type_id');
     }
-
-    // Ảnh phòng được lưu trong room_images theo type_id
-    // Có thể lấy qua: $room->roomType->images
 
     public function bookings()
     {

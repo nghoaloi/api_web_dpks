@@ -69,7 +69,6 @@ function renderProfileAvatar(userData) {
     if (userData && userData.avatar) {
         let avatarUrl = userData.avatar;
         if (!avatarUrl.startsWith('http')) {
-            // Laravel storage URL format: /storage/avatars/xxx.jpg
             if (avatarUrl.startsWith('/storage/')) {
                 avatarUrl = 'http://localhost:8000' + avatarUrl;
             } else if (avatarUrl.startsWith('storage/')) {
@@ -136,7 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRemove = document.getElementById('btn-remove-preview');
     const uploadBtn = document.getElementById('btn-upload-avatar');
     
-    // Khi chọn file
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files && e.target.files[0];
@@ -153,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Xóa preview
     if (btnRemove) {
         btnRemove.addEventListener('click', function() {
             if (fileInput) fileInput.value = '';
@@ -163,7 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Upload avatar
     if (uploadBtn) {
         uploadBtn.addEventListener('click', async function() {
             const file = fileInput && fileInput.files && fileInput.files[0];
@@ -193,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (res.ok) {
                     localStorage.setItem('userData', JSON.stringify(data.data));
                     renderProfileAvatar(data.data);
-                    // Reset preview
                     if (fileInput) fileInput.value = '';
                     previewContainer.style.display = 'none';
                     labelFile.style.display = 'inline-block';

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt phòng - Hotel Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/confirmation.css">
+</head>
+<body>
+
+    <div id="header-container"></div>
+
+    <main class="confirmation-container">
+        <div class="confirmation-card">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <h1 class="confirmation-title">Đặt phòng thành công!</h1>
+            <p class="confirmation-subtitle">Cảm ơn bạn đã đặt phòng tại khách sạn của chúng tôi</p>
+
+            <div class="booking-info" id="booking-info">
+                <div class="info-section">
+                    <h3><i class="fas fa-ticket-alt"></i> Mã đặt phòng</h3>
+                    <p class="booking-code" id="booking-code">-</p>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Ngày nhận phòng</h3>
+                    <p id="check-in-date">-</p>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-calendar-check"></i> Ngày trả phòng</h3>
+                    <p id="check-out-date">-</p>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> Tổng tiền</h3>
+                    <p class="total-price" id="total-price">-</p>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-credit-card"></i> Hình thức thanh toán</h3>
+                    <p id="payment-type">Thanh toán tại khách sạn khi nhận phòng</p>
+                </div>
+            </div>
+
+ 
+            <div class="important-notes">
+                <h3><i class="fas fa-info-circle"></i> Lưu ý quan trọng</h3>
+                <ul>
+                    <li>Vui lòng mang theo CMND/CCCD khi đến nhận phòng</li>
+                    <li>Check-in: Từ 14:00 (có thể sớm hơn nếu phòng trống)</li>
+                    <li>Check-out: Trước 12:00</li>
+                    <li>Lễ tân 24 giờ - Có thể nhận phòng bất cứ lúc nào</li>
+                    <li>Thanh toán sẽ được thực hiện tại khách sạn khi nhận phòng</li>
+                    <li>Mã đặt phòng đã được gửi qua email của bạn</li>
+                </ul>
+            </div>
+
+
+            <div class="confirmation-actions">
+                <button class="btn-primary" onclick="window.location.href='../index.html'">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </button>
+                <button class="btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print"></i> In xác nhận
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/confirmation.js"></script>
+</body>
+</html>
+

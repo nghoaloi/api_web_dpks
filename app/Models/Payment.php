@@ -13,15 +13,14 @@ class Payment extends Model
 
     protected $fillable = [
         'booking_id',
-        'amount',
-        'payment_method',
-        'payment_status',
-        'payment_date',
+        'total_amount',
+        'method',
+        'status',
+        'trans_code',
     ];
 
     protected $casts = [
-        'amount' => 'float',
-        'payment_date' => 'datetime',
+        'total_amount' => 'decimal:2',
     ];
 
     public function booking()

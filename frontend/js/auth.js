@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     } catch (_) {
-                        // ignore profile fetch failure, still proceed
+                        // ignore profile fetch failure for now 
                     }
 
                     window.location.href = '../index.html';

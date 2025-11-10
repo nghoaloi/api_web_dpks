@@ -8,7 +8,7 @@ class UserController extends Controller
 {
    public function index()
     {
-        $users = User::all(); // lấy tất cả bản ghi trong bảng users
+        $users = User::all(); 
         return response()->json($users, 200);
     }
 }

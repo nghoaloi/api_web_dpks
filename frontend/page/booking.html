@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt phòng - Hotel Booking</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/booking.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+    <main class="booking-page">
+        <div class="container booking-container">
+            <div class="booking-progress">
+                <div class="progress-step completed" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Bạn chọn</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step active" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Xác nhận</div>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Hoàn tất</div>
+                </div>
+            </div>
+
+            <div class="booking-content-grid">
+                <div class="booking-left">
+                    <div class="booking-room-card">
+                        <img id="booking-room-image" src="../images/background.jpg" alt="room">
+                        <div class="room-card-info">
+                            <h2 id="booking-room-name">Phòng</h2>
+                            <p id="booking-room-address" class="room-address">Khách sạn</p>
+                            
+                            <div class="room-rating" id="booking-room-rating">
+                            </div>
+
+                            <div class="room-amenities-brief" id="booking-room-amenities">  
+                            </div>
+
+                            <div class="booking-details-section">
+                                <h3>Chi tiết đặt phòng của bạn</h3>
+                                <div id="booking-details-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-right">
+                    <div id="availability-warning" style="display: none;"></div>
+                    
+
+                    <div class="booking-step active" id="step-1">
+                        <h2>Xác nhận thông tin đặt phòng</h2>
+                        
+                        <div class="booking-info-box">
+                            <div class="info-item">
+                                <span class="info-label">Loại phòng:</span>
+                                <span id="confirm-room-type" class="info-value">—</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Số lượng phòng:</span>
+                                <span id="confirm-quantity" class="info-value">—</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Check-in:</span>
+                                <span id="confirm-checkin" class="info-value">—</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Check-out:</span>
+                                <span id="confirm-checkout" class="info-value">—</span>
+                            </div>
+                            <div class="info-item total">
+                                <span class="info-label">Tổng giá:</span>
+                                <span id="confirm-total-price" class="info-value price">—</span>
+                            </div>
+                        </div>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="window.history.back()">Quay lại</button>
+                            <button class="btn-primary" onclick="nextStep()">Tiếp tục</button>
+                        </div>
+                    </div>
+
+                    <div class="booking-step" id="step-2">
+                        <h2>Chọn dịch vụ (Không bắt buộc)</h2>
+                        <p class="step-description">Bạn có thể chọn thêm các dịch vụ dưới đây</p>
+                        
+                        <div id="services-list" class="services-list">      
+                            <div class="loading-services">
+                                <i class="fa fa-spinner fa-spin"></i> Đang tải dịch vụ...
+                            </div>
+                        </div>
+                        
+                        <div id="selected-services-summary" class="selected-services-summary" style="display: none;">
+                            <h3>Dịch vụ đã chọn:</h3>
+                            <div id="selected-services-list"></div>
+                            <div class="services-total">
+                                <strong>Tổng giá dịch vụ: <span id="services-total-price">0</span> VNĐ</strong>
+                            </div>
+                        </div>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="prevStep()">Quay lại</button>
+                            <button class="btn-primary" onclick="nextStep()">Tiếp tục</button>
+                        </div>
+                    </div>
+
+                    <div class="booking-step" id="step-3">
+                        <h2>Thông tin cá nhân</h2>
+                        
+                        <div class="login-status">
+                            <i class="fa fa-user-check"></i>
+                            <span>Bạn đã được đăng nhập</span>
+                        </div>
+
+                        <form id="personal-info-form" class="booking-form">
+                            <div class="form-group">
+                                <label for="fullname">Họ và tên *</label>
+                                <input type="text" id="fullname" name="fullname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Địa chỉ email *</label>
+                                <input type="email" id="email" name="email" required>
+                                <small>Email xác nhận đặt phòng sẽ được gửi đến địa chỉ này</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại *</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Địa chỉ</label>
+                                <input type="text" id="address" name="address">
+                            </div>
+                        </form>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="prevStep()">Quay lại</button>
+                            <button class="btn-primary" onclick="nextStep()">Tiếp tục</button>
+                        </div>
+                    </div>
+
+                    <div class="booking-step" id="step-4">
+                        <h2>Yêu cầu đặc biệt</h2>
+                        
+                        <div class="info-box">
+                            <i class="fa fa-info-circle"></i>
+                            <p>Yêu cầu đặc biệt không đảm bảo sẽ được đáp ứng – tuy nhiên, chỗ nghỉ sẽ cố gắng hết sức để thực hiện.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="special-requests">Yêu cầu đặc biệt (không bắt buộc)</label>
+                            <textarea id="special-requests" name="special-requests" rows="4" placeholder="Vui lòng ghi yêu cầu của bạn tại đây..."></textarea>
+                        </div>
+
+                        <div class="arrival-time-section">
+                            <h3>Thời gian đến dự kiến</h3>
+                            <div class="info-points">
+                                <div class="info-point">
+                                    <i class="fa fa-check-circle"></i>
+                                    <span>Check-in: Từ 14:00 (có thể sớm hơn nếu phòng trống)</span>
+                                </div>
+                                <div class="info-point">
+                                    <i class="fa fa-clock"></i>
+                                    <span>Lễ tân 24 giờ - Có thể nhận phòng bất cứ lúc nào</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="arrival-time">Thời gian đến dự kiến (không bắt buộc)</label>
+                                <select id="arrival-time" name="arrival-time">
+                                    <option value="">Vui lòng chọn</option>
+                                    <option value="00:00">00:00 (Nửa đêm)</option>
+                                    <option value="01:00">01:00</option>
+                                    <option value="02:00">02:00</option>
+                                    <option value="03:00">03:00</option>
+                                    <option value="04:00">04:00</option>
+                                    <option value="05:00">05:00</option>
+                                    <option value="06:00">06:00</option>
+                                    <option value="07:00">07:00</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00 (Trưa)</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00 (Check-in tiêu chuẩn)</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="20:00">20:00</option>
+                                    <option value="21:00">21:00</option>
+                                    <option value="22:00">22:00</option>
+                                    <option value="23:00">23:00</option>
+                                </select>
+                                <small>Thời gian theo múi giờ Việt Nam. Nếu đến sớm hơn 14:00, phòng có thể chưa sẵn sàng.</small>
+                            </div>
+                        </div>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="prevStep()">Quay lại</button>
+                            <button class="btn-primary" onclick="nextStep()">Tiếp tục</button>
+                        </div>
+                    </div>
+
+                    <div class="booking-step" id="step-5">
+                        <h2>Xem lại quy tắc chung</h2>
+                        
+                        <p class="rules-intro">Chỗ nghỉ muốn bạn đồng ý với các quy tắc chung này:</p>
+                        
+                        <ul class="rules-list">
+                            <li>Không hút thuốc trong phòng</li>
+                            <li>Không tiệc tùng/sự kiện</li>
+                            <li>Giữ yên tĩnh sau 22:00</li>
+                            <li>Tuân thủ quy định về thú cưng (nếu có)</li>
+                        </ul>
+                        
+                        <p class="rules-agree">Khi tiếp tục các bước tiếp theo, bạn đồng ý với các quy tắc chung này.</p>
+
+                        <div class="terms-checkbox">
+                            <label>
+                                <input type="checkbox" id="agree-terms" required>
+                                <span>Tôi đồng ý với <a href="#">điều kiện đặt phòng</a>, <a href="#">điều khoản chung</a> và <a href="#">chính sách bảo mật</a></span>
+                            </label>
+                        </div>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="prevStep()">Quay lại</button>
+                            <button class="btn-primary" id="btn-complete-booking" onclick="completeBooking()">
+                                <i class="fa fa-lock"></i> Hoàn tất đặt phòng
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="booking-step" id="step-6" style="display: none;">
+                        <h2>Hoàn tất đặt phòng</h2>
+                        
+                        <div class="payment-info-box">
+                            <h3>Thông tin thanh toán</h3>
+                            <p id="payment-method-info">Thanh toán sẽ được xử lý tại chỗ nghỉ. Bạn không cần nhập thông tin thanh toán ngay bây giờ.</p>
+                        </div>
+
+                        <div class="booking-summary-final">
+                            <h3>Tóm tắt đặt phòng</h3>
+                            <div id="final-booking-summary"></div>
+                        </div>
+
+                        <div class="terms-checkbox">
+                            <label>
+                                <input type="checkbox" id="agree-terms" required>
+                                <span>Tôi đồng ý với <a href="#">điều kiện đặt phòng</a>, <a href="#">điều khoản chung</a> và <a href="#">chính sách bảo mật</a></span>
+                            </label>
+                        </div>
+
+                        <button class="btn-complete" id="btn-complete-booking" onclick="completeBooking()">
+                            <i class="fa fa-lock"></i>
+                            Hoàn tất đặt phòng
+                        </button>
+
+                        <div class="booking-actions">
+                            <button class="btn-secondary" onclick="prevStep()">Quay lại</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/booking.js"></script>
+</body>
+</html>
+

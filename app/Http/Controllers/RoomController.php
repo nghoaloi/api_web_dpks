@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    //  Lấy danh sách tất cả phòng
     public function index()
     {
-        // load thêm loại phòng và ảnh để xem thông tin chi tiết
         $rooms = Room::with('roomType.images')->get();
         return response()->json([
             'success' => true,
@@ -18,7 +16,6 @@ class RoomController extends Controller
         ]);
     }
 
-    //  Thêm 1 phòng mới
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -36,7 +33,6 @@ class RoomController extends Controller
         ], 201);
     }
 
-    // 🟢 Lấy chi tiết 1 phòng theo ID
     public function show_by_id($id)
     {
         $room = Room::with('roomType.images')->find($id);
@@ -51,7 +47,6 @@ class RoomController extends Controller
         ]);
     }
 
-    // 🟢 Cập nhật thông tin phòng
     public function update(Request $request, $id)
     {
         $room = Room::find($id);
@@ -74,7 +69,6 @@ class RoomController extends Controller
         ]);
     }
 
-    // 🟢 Xóa phòng
     public function destroy($id)
     {
         $room = Room::find($id);

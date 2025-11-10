@@ -38,4 +38,9 @@ class RoomType extends Model
     {
         return $this->hasMany(RoomImage::class, 'type_id');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'type_id');
+    }
 }

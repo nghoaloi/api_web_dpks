@@ -28,13 +28,8 @@ use App\Http\Controllers\ServiceController;
     //roomtype
     Route::get('/room-types',[RoomTypeController::class,'index']);
     Route::get('/room-types/{id}',[RoomTypeController::class,'show']);
+    Route::get('/room-types/{id}/availability',[RoomTypeController::class,'checkAvailability']);
 
-    //room images
-    use App\Http\Controllers\RoomImageController;
-    Route::get('/room-images', [RoomImageController::class, 'index']);
-    Route::get('/room-images/type/{typeId}', [RoomImageController::class, 'getByType']);
-    Route::post('/room-images', [RoomImageController::class, 'store']);
-    Route::delete('/room-images/{id}', [RoomImageController::class, 'destroy']);
 
     //dịch vụ
     Route::get('/services', [ServiceController::class, 'index']);
@@ -45,5 +40,17 @@ use App\Http\Controllers\ServiceController;
 
     // bookings (chỉ cho user đã đăng nhập)
     use App\Http\Controllers\BookingController;
-    Route::middleware('auth:sanctum')->get('/bookings', [BookingController::class, 'index']);
+    use App\Http\Controllers\PaymentController;
+    use App\Http\Controllers\VNPayController;
+    Route::middleware('auth:sanctum')->group(function(){
+        Route::get('/bookings', [BookingController::class, 'index']);
+        Route::get('/bookings/{id}', [BookingController::class, 'show']);
+        Route::post('/bookings', [BookingController::class, 'store']);
+        Route::post('/payments/update', [PaymentController::class, 'update']);
+        Route::post('/vnpay/create-payment-url', [VNPayController::class, 'createPaymentUrl']);
+    });
+    
+    
+    Route::get('/vnpay/return', [VNPayController::class, 'return']);
+    Route::post('/vnpay/ipn', [VNPayController::class, 'ipn']); 
 ?>

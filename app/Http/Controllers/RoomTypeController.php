@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoomType;
 use App\Models\Room;
+use App\Models\Review;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -15,12 +16,26 @@ class RoomTypeController extends Controller
     public function index()
     {
         try{
-            $roomtype = RoomType::with('images')
-                ->latest()
-                ->get();
+            $roomtypes = RoomType::with('images')->latest()->get();
+            
+            // Thêm thông tin rating cho mỗi room type
+            $roomtypes->transform(function($roomType) {
+                $roomTypeData = $roomType->toArray();
+                
+                // Tính average rating và số lượng reviews
+                $reviews = Review::where('type_id', $roomType->id)->get();
+                $reviewCount = $reviews->count();
+                $avgRating = $reviewCount > 0 ? $reviews->avg('rating') : 0;
+                
+                $roomTypeData['rating'] = round($avgRating, 1);
+                $roomTypeData['review_count'] = $reviewCount;
+                
+                return $roomTypeData;
+            });
+            
             return response()->json([
                 'success' => true,
-                'data' => $roomtype
+                'data' => $roomtypes
             ], 200);
         }
         catch(\Exception $e){
@@ -71,10 +86,17 @@ class RoomTypeController extends Controller
             // Tổng số phòng của loại này
             $totalRoomsCount = Room::where('type_id', $id)->count();
 
-            // Thêm thông tin số phòng vào response
+            // Tính average rating và số lượng reviews
+            $reviews = Review::where('type_id', $id)->get();
+            $reviewCount = $reviews->count();
+            $avgRating = $reviewCount > 0 ? $reviews->avg('rating') : 0;
+
+            // Thêm thông tin vào response
             $roomTypeData = $roomType->toArray();
             $roomTypeData['available_rooms_count'] = $availableRoomsCount;
             $roomTypeData['total_rooms_count'] = $totalRoomsCount;
+            $roomTypeData['rating'] = round($avgRating, 1);
+            $roomTypeData['review_count'] = $reviewCount;
 
             return response()->json([
                 'success' => true,
@@ -111,5 +133,64 @@ class RoomTypeController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function checkAvailability(Request $request, string $id)
+    {
+        try {
+            $roomType = RoomType::find($id);
+            if (!$roomType) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy loại phòng'
+                ], 404);
+            }
+
+            $request->validate([
+                'check_in' => 'required|date',
+                'check_out' => 'required|date|after:check_in',
+                'quantity' => 'nullable|integer|min:1|max:10',
+            ]);
+
+            $checkIn = $request->input('check_in');
+            $checkOut = $request->input('check_out');
+            $requestedQuantity = $request->input('quantity', 1);
+
+            $availableRoomsCount = Room::where('type_id', $id)
+                ->where('status', 'Còn phòng')
+                ->count();
+                
+            $totalRoomsCount = Room::where('type_id', $id)->count();
+
+            $isAvailable = $availableRoomsCount >= $requestedQuantity;
+
+            return response()->json([
+                'success' => true,  
+                'room_type_id' => (int)$id,
+                'room_type_name' => $roomType->name,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'requested_quantity' => $requestedQuantity,
+                'available_count' => $availableRoomsCount,
+                'total_count' => $totalRoomsCount,
+                'is_available' => $isAvailable,
+                'message' => $isAvailable 
+                    ? "Còn {$availableRoomsCount} phòng trống" 
+                    : "Chỉ còn {$availableRoomsCount} phòng trống (yêu cầu: {$requestedQuantity})"
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi kiểm tra phòng trống',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
