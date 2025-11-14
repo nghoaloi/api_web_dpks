@@ -124,7 +124,7 @@ class AuthController extends Controller
                 'error'=>$e->getMessage()
             ],500);
         }
-    }
+    }   
 
     public function updateProfile(Request $request){
         try{
