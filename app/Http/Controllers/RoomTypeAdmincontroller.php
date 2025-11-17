@@ -7,7 +7,7 @@
  use Illuminate\Support\Facades\Validator;
  use Exception;
 
- class RoomTypeController extends Controller
+ class RoomTypeAdminController extends Controller
  {
      /**
       * Lấy danh sách loại phòng
