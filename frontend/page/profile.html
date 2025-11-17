@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - Hotel Booking</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="profile-container">
+                <div class="profile-content">
+                    <div class="profile-info">
+                        <div class="avatar-section">
+                            <div class="avatar-wrapper">
+                                <img id="profile-avatar" class="avatar-img" src="" alt="avatar">
+                                <span id="profile-avatar-initial" class="avatar-initial">U</span>
+                            </div>
+                            <div class="avatar-upload">
+                                <input type="file" id="avatar-file" accept="image/*" style="display:none;">
+                                <label for="avatar-file" id="label-file" class="btn-file">Chọn ảnh</label>
+                                <div id="preview-container" class="preview-container" style="display:none;">
+                                    <img id="preview-img" class="preview-img" alt="preview">
+                                    <button type="button" id="btn-remove-preview" class="btn-remove">×</button>
+                                </div>
+                                <button id="btn-upload-avatar" class="btn-upload" style="display:none;">Cập nhật ảnh</button>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Họ và tên:</label>
+                            <span id="fullname">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="email">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Số điện thoại:</label>
+                            <span id="phone">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Giới tính:</label>
+                            <span id="gender">-</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Địa chỉ:</label>
+                            <span id="address">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>

@@ -20,8 +20,6 @@ class Booking extends Model
         'check_out',
         'total_price',
         'status',
-        'created_at',
-        'updated_at'
     ];
 
     public function user()
@@ -42,5 +40,10 @@ class Booking extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class, 'booking_id');
+    }
+    
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'booking_id');
     }
 }

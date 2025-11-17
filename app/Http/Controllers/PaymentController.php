@@ -3,105 +3,138 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Booking;
+use App\Models\BookingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    //    Lấy danh sách tất cả các thanh toán
-    public function index()
+    public function update(Request $request)
     {
-        $payments = Payment::with('booking')->get();
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
 
-        return response()->json([
-              
-            'data' => $payments
-        ]);
-    }
+            $validated = $request->validate([
+                'booking_id' => 'required|integer|exists:bookings,id',
+                'method' => 'nullable|string|max:255',
+                'status' => 'nullable|string|in:Chờ thanh toán,Đã thanh toán,Thanh toán thất bại,Đã hoàn tiền',
+                'trans_code' => 'nullable|string|max:255',
+            ]);
 
-    //    Lấy chi tiết 1 thanh toán theo ID
-    public function show($id)
-    {
-        $payment = Payment::with('booking')->find($id);
+            $booking = Booking::find($validated['booking_id']);
+            
+            if ($booking->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền cập nhật thanh toán này'
+                ], 403);
+            }
 
-        if (!$payment) {
+            DB::beginTransaction();
+
+            $relatedBookings = Booking::where('user_id', $user->id)
+                ->where('check_in', $booking->check_in)
+                ->where('check_out', $booking->check_out)
+                ->orderBy('id', 'asc')
+                ->pluck('id')
+                ->toArray();
+            
+            $payment = Payment::whereIn('booking_id', $relatedBookings)->first();
+
+            Log::info('Payment update request', [
+                'booking_id' => $validated['booking_id'],
+                'related_bookings' => $relatedBookings,
+                'payment_found' => $payment ? $payment->id : null,
+                'user_id' => $user->id
+            ]);
+
+            if ($payment) {
+                $payment->update([
+                    'method' => $validated['method'] ?? $payment->method,
+                    'status' => $validated['status'] ?? $payment->status,
+                    'trans_code' => $validated['trans_code'] ?? $payment->trans_code,
+                ]);
+                
+                Log::info('Payment updated', [
+                    'payment_id' => $payment->id,
+                    'status' => $payment->status,
+                    'method' => $payment->method,
+                    'trans_code' => $payment->trans_code
+                ]);
+            } else {
+                $roomType = $booking->room->roomType;
+                
+                $totalRoomPrice = Booking::whereIn('id', $relatedBookings)->sum('total_price');
+                
+                $totalServicesPrice = BookingService::whereIn('booking_id', $relatedBookings)
+                    ->sum(DB::raw('price * quantity'));
+                
+                $totalPrice = $totalRoomPrice + $totalServicesPrice;
+                
+                $paymentAmount = $totalPrice;
+                if ($roomType->payment_type === 'trả trước một phần') {
+                    $paymentAmount = $totalPrice * 0.3;
+                } elseif ($roomType->payment_type === 'Không cần thanh toán trước') {
+                    $paymentAmount = 0;
+                }
+
+                $firstBookingId = !empty($relatedBookings) ? $relatedBookings[0] : $booking->id;
+                $payment = Payment::create([
+                    'booking_id' => $firstBookingId,
+                    'total_amount' => $paymentAmount,
+                    'method' => $validated['method'] ?? null,
+                    'status' => $validated['status'] ?? 'Chờ thanh toán',
+                    'trans_code' => $validated['trans_code'] ?? null,
+                ]);
+                
+                Log::info('Payment created', [
+                    'payment_id' => $payment->id,
+                    'booking_id' => $firstBookingId,
+                    'total_amount' => $paymentAmount,
+                    'total_room_price' => $totalRoomPrice,
+                    'total_services_price' => $totalServicesPrice,
+                    'total_price' => $totalPrice,
+                    'status' => $payment->status,
+                    'method' => $payment->method
+                ]);
+            }
+
+            if ($payment->status === 'Đã thanh toán') {
+                $booking->update(['status' => 'Đã thanh toán']);
+                
+                Booking::where('user_id', $user->id)
+                    ->where('check_in', $booking->check_in)
+                    ->where('check_out', $booking->check_out)
+                    ->update(['status' => 'Đã thanh toán']);
+            }
+
+            DB::commit();
+
             return response()->json([
-                  
-                'message' => 'Không tìm thấy thanh toán'
-            ], 404);
-        }
+                'success' => true,
+                'message' => 'Cập nhật thanh toán thành công!',
+                'data' => $payment
+            ]);
 
-        return response()->json([
-              
-            'data' => $payment
-        ]);
-    }
-
-    //    Thêm mới thanh toán
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|max:255',
-            'payment_status' => 'required|string|max:255',
-            'payment_date' => 'nullable|date',
-        ]);
-
-        $payment = Payment::create($validated);
-
-        return response()->json([
-              
-            'message' => 'Thêm thanh toán thành công!',
-            'data' => $payment
-        ], 201);
-    }
-
-    //    Cập nhật thông tin thanh toán
-    public function update(Request $request, $id)
-    {
-        $payment = Payment::find($id);
-
-        if (!$payment) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                  
-                'message' => 'Không tìm thấy thanh toán'
-            ], 404);
-        }
-
-        $validated = $request->validate([
-            'booking_id' => 'sometimes|exists:bookings,id',
-            'amount' => 'sometimes|numeric|min:0',
-            'payment_method' => 'sometimes|string|max:255',
-            'payment_status' => 'sometimes|string|max:255',
-            'payment_date' => 'nullable|date',
-        ]);
-
-        $payment->update($validated);
-
-        return response()->json([
-              
-            'message' => 'Cập nhật thanh toán thành công!',
-            'data' => $payment
-        ]);
-    }
-
-    //    Xóa thanh toán
-    public function destroy($id)
-    {
-        $payment = Payment::find($id);
-
-        if (!$payment) {
+                'success' => false,
+                'message' => 'Lỗi xác thực dữ liệu',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
-                  
-                'message' => 'Không tìm thấy thanh toán'
-            ], 404);
+                'success' => false,
+                'message' => 'Lỗi khi cập nhật thanh toán',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $payment->delete();
-
-        return response()->json([
-              
-            'message' => 'Xóa thanh toán thành công!'
-        ]);
     }
 }
+

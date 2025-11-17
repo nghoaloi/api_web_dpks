@@ -13,7 +13,7 @@ class Review extends Model
 
     protected $fillable = [
         'user_id',
-        'room_id',
+        'type_id',
         'rating',
         'comment',
     ];
@@ -23,8 +23,8 @@ class Review extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function room()
+    public function roomType()
     {
-        return $this->belongsTo(Room::class, 'room_id');
+        return $this->belongsTo(RoomType::class, 'type_id');
     }
 }

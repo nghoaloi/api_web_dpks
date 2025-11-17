@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -53,7 +54,7 @@ class AuthController extends Controller
                 'password'=>'required|string|min:6',
                 'fullname'=>'required|string|max:120',
                 'phone'=>'required|string|min:10|max:14',
-                'gender'=>'nullable|integer',
+                'gender'=>'nullable|integer|in:0,1',
                 'address'=>'nullable|string',
                 'status'=>'nullable|string|in:active, lock',
             ],
@@ -124,20 +125,58 @@ class AuthController extends Controller
                 'error'=>$e->getMessage()
             ],500);
         }
-    }   
+    }
+
+    public function updateAvatar(Request $request){
+        try{
+            $request->validate([
+                'avatar'=>'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            ]);
+
+            $user = $request->user();
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $publicUrl = Storage::url($path);
+            $user->update(['avatar' => $publicUrl]);
+
+            return response()->json([
+                'message'=>'Cập nhật ảnh thành công',
+                'data'=>$user->fresh()
+            ],200);
+        }
+        catch(ValidationException $e){
+            return response()->json([
+                'message'=>'Lỗi dữ liệu ảnh',
+                'errors'=>$e->errors()
+            ],422);
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'message'=>'Cập nhật ảnh thất bại',
+                'error'=>$e->getMessage()
+            ],500);
+        }
+    }
 
     public function updateProfile(Request $request){
         try{
             $request->validate([
                 'fullname'=>'required|string|max:120',
                 'phone'=>'nullable|string|min:10|max:14',
-                'birthday'=>'nullable|date',
-                'gender'=>'nullable|string|in:male,female,other',
-                'address'=>'nullable|string|max:255'
+                'gender'=>'nullable|integer|in:0,1',
+                'address'=>'nullable|string|max:255',
+                'avatar'=>'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
             ]);
 
             $user=$request->user();
-            $user->update($request->only(['fullname','phone','birthday','gender','address']));
+            $payload = $request->only(['fullname','phone','gender','address']);
+
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $publicUrl = Storage::url($path);
+                $payload['avatar'] = $publicUrl;
+            }
+
+            $user->update($payload);
 
             return response()->json([
                 'message'=>'Cập nhật thông tin thành công',

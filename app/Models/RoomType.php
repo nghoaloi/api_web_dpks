@@ -27,15 +27,20 @@ class RoomType extends Model
         'max_cap' => 'integer',
         'single_bed' => 'integer',
         'double_bed' => 'integer',
-        'payment_type' => 'string',
-        'allow_pet' => 'string',
     ];
-
-    public $timestamps = true;
 
     public function rooms()
     {
-        // Khóa ngoại trong bảng rooms là "type_id"
         return $this->hasMany(Room::class, 'type_id');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(RoomImage::class, 'type_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'type_id');
     }
 }

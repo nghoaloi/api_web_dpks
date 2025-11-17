@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Hotel Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/payment.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="payment-container">
+        <div class="payment-wrapper">   
+            <div class="booking-summary-card">
+                <h2><i class="fas fa-receipt"></i> Tóm tắt đặt phòng</h2>
+                
+                <div class="summary-section" id="booking-summary">
+                    <div class="summary-item">
+                        <span>Mã đặt phòng:</span>
+                        <strong id="booking-code">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Loại phòng:</span>
+                        <strong id="room-type">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Số lượng:</span>
+                        <strong id="quantity">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Ngày nhận phòng:</span>
+                        <strong id="check-in">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Ngày trả phòng:</span>
+                        <strong id="check-out">-</strong>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item">
+                        <span>Tổng tiền:</span>
+                        <strong id="total-price">-</strong>
+                    </div>
+                    <div class="summary-item highlight" id="payment-amount-section">
+                        <span>Số tiền thanh toán:</span>
+                        <strong id="payment-amount">-</strong>
+                    </div>
+                    <div class="summary-item" id="remaining-amount-section" style="display: none;">
+                        <span>Số tiền còn lại (thanh toán tại khách sạn):</span>
+                        <strong id="remaining-amount">-</strong>
+                    </div>
+                </div>
+
+                <div class="tax-info">
+                    <p><small>(cho tất cả các khách)</small></p>
+                    <p><small>Đã bao gồm thuế và phí</small></p>
+                </div>
+            </div>
+
+            <div class="payment-form-card">
+                <h2>Bạn muốn thanh toán bằng cách nào?</h2>
+                
+                <div class="payment-method-selection">
+                    <label class="payment-method-radio selected" id="method-vnpay">
+                        <input type="radio" name="payment-method" value="vnpay" checked>
+                        <div class="radio-checkmark">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="method-icon vnpay">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <span>VNPay</span>
+                    </label>
+                    
+                    <label class="payment-method-radio" id="method-momo">
+                        <input type="radio" name="payment-method" value="momo">
+                        <div class="radio-checkmark">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="method-icon momo">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <span>MoMo</span>
+                    </label>
+                </div>
+
+                <div class="payment-gateway-form" id="vnpay-form">
+                    <div class="gateway-info">
+                        <h3><i class="fas fa-wallet"></i> Thanh toán qua VNPay</h3>
+                        <p>Bạn sẽ được chuyển hướng đến trang thanh toán VNPay để hoàn tất giao dịch.</p>
+                        <div class="gateway-features">
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Bảo mật cao</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Xử lý nhanh</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Hỗ trợ nhiều ngân hàng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-gateway-form" id="momo-form" style="display: none;">
+                    <div class="gateway-info">
+                        <h3><i class="fas fa-mobile-alt"></i> Thanh toán qua MoMo</h3>
+                        <p>Bạn sẽ được chuyển hướng đến ứng dụng MoMo để hoàn tất giao dịch.</p>
+                        <div class="gateway-features">
+                            <div class="feature-item">
+                                <i class="fas fa-qrcode"></i>
+                                <span>Quét QR Code</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-bolt"></i>
+                                <span>Thanh toán tức thì</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>An toàn bảo mật</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-actions">
+                    <button class="btn-pay" id="btn-pay" onclick="processPayment(event)">
+                        <i class="fas fa-lock"></i> Thanh toán
+                    </button>
+                    <button class="btn-cancel" onclick="window.location.href='../index.html'">
+                        Hủy
+                    </button>
+                </div>
+
+                <div class="security-note">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Thông tin thanh toán của bạn được bảo mật và mã hóa</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/payment.js"></script>
+</body>
+</html>

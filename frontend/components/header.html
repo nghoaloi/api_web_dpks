@@ -1,0 +1,110 @@
+
+<header class="main-header">
+    <div class="container">
+        <div class="header-content">
+            
+            <div class="logo">
+                <a href="index.html">
+                    <i class="fas fa-hotel"></i>
+                    <span>Hotel Booking</span>
+                </a>
+            </div>
+
+
+            <nav class="nav-menu">
+                <ul class="nav-items">
+                    <li class="nav-item active">
+                        <a href="index.html">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#hotels">Khách sạn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#contact">Liên hệ</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="auth-section">
+                <div id="auth-buttons" class="auth-buttons">
+                    <a href="page/login.html" class="btn-login">Đăng nhập</a>
+                    <a href="page/register.html" class="btn-register">Đăng ký</a>
+                </div>
+                
+                <div id="user-account" class="user-account" style="display: none;">
+                    <div class="user-info">
+                        <img id="user-avatar" class="avatar-img" src="" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:none;">
+                        <span id="user-avatar-initial" class="avatar-circle" style="display:none;">U</span>
+                        <span id="user-name">Tài khoản</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="user-dropdown" class="user-dropdown">
+                        <a href="page/profile.html" id="profile-btn">
+                            <i class="fas fa-user"></i>
+                            Thông tin cá nhân
+                        </a>
+                        <a href="#" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <div class="mobile-logo">
+                <i class="fas fa-hotel"></i>
+                <span>Hotel Booking</span>
+            </div>
+            <button class="close-menu" id="close-menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <nav class="mobile-nav">
+            <ul class="mobile-nav-items">
+                <li class="mobile-nav-item active">
+                    <a href="index.html">Trang chủ</a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="#hotels">Khách sạn</a>
+                </li>
+                <li class="mobile-nav-item">
+                    <a href="#contact">Liên hệ</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="mobile-auth">
+            <div id="mobile-auth-buttons" class="mobile-auth-buttons">
+                <a href="page/login.html" class="mobile-btn-login">Đăng nhập</a>
+                <a href="page/register.html" class="mobile-btn-register">Đăng ký</a>
+            </div>
+            
+            <div id="mobile-user-account" class="mobile-user-account" style="display: none;">
+                <div class="mobile-user-info">
+                    <img id="mobile-user-avatar" class="avatar-img" src="" alt="avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:none;">
+                    <span id="mobile-user-avatar-initial" class="avatar-circle" style="width:28px;height:28px;display:none;">U</span>
+                    <span id="mobile-user-name">Tài khoản</span>
+                </div>
+                <div class="mobile-user-actions">
+                    <a href="page/profile.html" class="mobile-logout-btn">
+                        <i class="fas fa-user"></i>
+                        Thông tin cá nhân
+                    </a>
+                    <a href="#" id="mobile-logout-btn" class="mobile-logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
