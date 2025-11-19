@@ -7,6 +7,8 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\BookingAdminController;
 use App\Http\Controllers\RoomTypeAdminController;
 use App\Http\Controllers\AmenityController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\BookingServiceAdminController;
     Route::prefix('auth')->group(function(){
         Route::post('/login',[AuthController::class,'login']);
         Route::post('/register',[AuthController::class,'register']);
@@ -49,6 +51,12 @@ use App\Http\Controllers\AmenityController;
     Route::middleware('auth:sanctum')->group(function(){
         // tiện ích
         Route::get('/amenity', [AmenityController::class, 'index']);
+        Route::get('/amenity/{id}', [AmenityController::class, 'show']);
+        Route::post('/amenity', [AmenityController::class, 'store']);
+        Route::put('/amenity/{id}', [AmenityController::class, 'update']);
+        Route::delete('/amenity/{id}', [AmenityController::class, 'destroy']);
+        
+        Route::get('/amenity-search', [AmenityController::class, 'search']);
         // đặt dịch vụ
         Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
         Route::get('booking-services/{id}', [BookingServiceAdminController::class, 'show']);
@@ -56,11 +64,11 @@ use App\Http\Controllers\AmenityController;
         Route::put('booking-services/{id}', [BookingServiceAdminController::class, 'update']);
         Route::delete('booking-services/{id}', [BookingServiceAdminController::class, 'destroy']);
         // laoị phòng
-        Route::get('roomtype/', [RoomTypeAdminController::class, 'index']);              
-        Route::get('roomtype/{id}', [RoomTypeAdminController::class, 'show_by_id']);      
-        Route::post('roomtype/', [RoomTypeAdminController::class, 'store']);              
-        Route::put('roomtype/{id}', [RoomTypeAdminController::class, 'update']);          
-        Route::delete('roomtype/{id}', [RoomTypeAdminController::class, 'destroy']);      
+        Route::get('room-types/', [RoomTypeAdminController::class, 'index']);              
+        Route::get('room-types/{id}', [RoomTypeAdminController::class, 'show_by_id']);      
+        Route::post('room-types/', [RoomTypeAdminController::class, 'store']);              
+        Route::put('room-types/{id}', [RoomTypeAdminController::class, 'update']);          
+        Route::delete('room-types/{id}', [RoomTypeAdminController::class, 'destroy']);      
         // đặt phòng
         Route::get('/bookings', [BookingAdminController::class, 'index']);
         Route::get('/bookings/{id}', [BookingAdminController::class, 'show']);
