@@ -51,6 +51,39 @@
                             <h3>Tiện nghi phòng</h3>
                             <div id="room-amenities-list" class="amenities-list"></div>
                         </div>
+
+                        <div class="room-reviews" id="reviews-section">
+                            <div class="reviews-header">
+                                <div>
+                                    <h3>Đánh giá từ khách đã lưu trú</h3>
+                                    <p>Chia sẻ trải nghiệm của bạn để những khách khác yên tâm lựa chọn.</p>
+                                </div>
+                                <div class="reviews-summary-card">
+                                    <div class="summary-score">
+                                        <span id="reviews-average">0.0</span>
+                                        <div>
+                                            <small>Điểm trung bình</small>
+                                            <p id="reviews-count">0 đánh giá</p>
+                                        </div>
+                                    </div>
+                                    <div id="reviews-distribution" class="reviews-distribution"></div>
+                                </div>
+                            </div>
+
+                            <div id="reviews-loading" class="reviews-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Đang tải đánh giá...</span>
+                            </div>
+
+                            <div id="review-form-wrapper"></div>
+
+                            <div id="reviews-empty" class="reviews-empty" style="display: none;">
+                                <i class="fas fa-comments"></i>
+                                <p>Chưa có đánh giá nào cho phòng này. Hãy là người đầu tiên!</p>
+                            </div>
+
+                            <div id="reviews-list" class="reviews-list"></div>
+                        </div>
                     </div>
                 </div>
 

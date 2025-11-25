@@ -348,13 +348,14 @@
     }
 
     function decreaseServiceQuantity(serviceId) {
-        if (selectedServices[serviceId] && selectedServices[serviceId].quantity > 1) {
+        if (selectedServices[serviceId] && selectedServices[serviceId].quantity >= 0) {
             selectedServices[serviceId].quantity--;
             renderServices();
         } else if (selectedServices[serviceId] && selectedServices[serviceId].quantity === 1) {
             delete selectedServices[serviceId];
             renderServices();
         }
+        renderServices();
     }
 
     function updateServicesSummary() {

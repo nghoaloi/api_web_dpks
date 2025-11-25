@@ -11,6 +11,8 @@ use App\Models\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmationMail;
 use Carbon\Carbon;
 
 class BookingController extends Controller
@@ -24,7 +26,11 @@ class BookingController extends Controller
         }
         
         $bookings = Booking::where('user_id', $user->id)
-            ->with('room.roomType')
+            ->with([
+                'room.roomType',
+                'services',
+                'payment'
+            ])
             ->latest()
             ->get();
 
@@ -91,7 +97,10 @@ class BookingController extends Controller
         if ($payment) {
             $paymentAmount = $payment->total_amount;
             $needPayment = true;
-            if ($paymentType === 'Trả trước một phần') {
+
+            if ($paymentType === 'Thanh toán trước' && $payment->status === 'Đã thanh toán') {
+                $paymentAmount = $totalPrice;
+            } elseif ($paymentType === 'Trả trước một phần') {
                 $remainingAmount = $totalPrice - $paymentAmount;
             }
         } else {
@@ -133,7 +142,7 @@ class BookingController extends Controller
                 'room_type_id' => 'required|integer|exists:room_types,id',
                 'quantity' => 'required|integer|min:1|max:10',
                 'check_in' => 'required|date',
-                'check_out' => 'required|date|after:check_in',
+                'check_out' => 'required|date|after_or_equal:check_in',
                 'special_requests' => 'nullable|string|max:1000',
                 'arrival_time' => 'nullable|string|max:6',
                 'fullname' => 'required|string|max:255',
@@ -184,6 +193,7 @@ class BookingController extends Controller
                         
                         $selectedServices[] = [
                             'service_id' => $serviceId,
+                            'service_name' => $service->service_name ?? $service->name ?? null,
                             'quantity' => $serviceQuantity,
                             'price' => $service->price,
                             'total' => $servicePrice
@@ -302,6 +312,45 @@ class BookingController extends Controller
                 'payment_amount' => $paymentAmount,
                 'booking_code' => $bookingCode
             ]);
+
+            try {
+                $roomNumbers = isset($availableRooms) ? $availableRooms->pluck('room_number')->filter()->values()->all() : [];
+                $remainingAmountEmail = null;
+                if (($paymentTypeNormalized ?? '') === 'Trả trước một phần' && $paymentAmount !== null) {
+                    $remainingAmountEmail = $totalPrice - $paymentAmount;
+                } elseif (!$needPayment) {
+                    $remainingAmountEmail = $totalPrice;
+                }
+
+                $bookingMailData = [
+                    'booking_code' => $bookingCode,
+                    'customer_name' => $validated['fullname'] ?? ($user->name ?? 'Quý khách'),
+                    'room_type' => $roomType->name ?? '',
+                    'quantity' => $quantity,
+                    'room_numbers' => $roomNumbers,
+                    'check_in' => $checkIn->format('d/m/Y'),
+                    'check_out' => $checkOut->format('d/m/Y'),
+                    'room_total_price' => $roomTotalPrice,
+                    'services_total_price' => $servicesTotalPrice,
+                    'total_price' => $totalPrice,
+                    'services' => $selectedServices,
+                    'payment_type' => $paymentType,
+                    'payment_amount' => $paymentAmount,
+                    'need_payment' => $needPayment,
+                    'remaining_amount' => $remainingAmountEmail,
+                    'booking_url' => url('/frontend/page/confirmation.html?booking_code=' . $bookingCode),
+                    'support_hotline' => config('app.support_hotline', '1900 113 114 115'),
+                ];
+
+                if (!$needPayment) {
+                    Mail::to($validated['email'])->send(new BookingConfirmationMail($bookingMailData));
+                }
+            } catch (\Exception $mailException) {
+                Log::error('Booking confirmation email failed: ' . $mailException->getMessage(), [
+                    'booking_code' => $bookingCode,
+                    'email' => $validated['email'] ?? null,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,

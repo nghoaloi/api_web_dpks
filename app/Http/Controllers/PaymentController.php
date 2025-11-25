@@ -8,6 +8,9 @@ use App\Models\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmationMail;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -111,6 +114,91 @@ class PaymentController extends Controller
                     ->where('check_in', $booking->check_in)
                     ->where('check_out', $booking->check_out)
                     ->update(['status' => 'Đã thanh toán']);
+
+                try {
+                    $bookingsCollection = Booking::whereIn('id', $relatedBookings)
+                        ->with('room.roomType')
+                        ->get();
+
+                    $firstBookingRecord = $bookingsCollection->first();
+                    $roomType = $firstBookingRecord->room->roomType ?? $booking->room->roomType;
+                    $roomNumbers = $bookingsCollection->map(function ($bookingItem) {
+                        return $bookingItem->room->room_number ?? null;
+                    })->filter()->values()->all();
+                    $quantity = $bookingsCollection->count();
+                    $roomTotalPrice = $bookingsCollection->sum('total_price');
+                    $checkInFormatted = null;
+                    $checkOutFormatted = null;
+                    if ($firstBookingRecord && $firstBookingRecord->check_in) {
+                        $checkInFormatted = Carbon::parse($firstBookingRecord->check_in)->format('d/m/Y');
+                    }
+                    if ($firstBookingRecord && $firstBookingRecord->check_out) {
+                        $checkOutFormatted = Carbon::parse($firstBookingRecord->check_out)->format('d/m/Y');
+                    }
+
+                    $bookingServices = BookingService::whereIn('booking_id', $relatedBookings)
+                        ->with('service')
+                        ->get();
+
+                    $servicesList = $bookingServices->map(function ($bookingService) {
+                        $serviceName = $bookingService->service->service_name ?? $bookingService->service->name ?? '';
+                        $total = $bookingService->price * $bookingService->quantity;
+                        return [
+                            'service_id' => $bookingService->service_id,
+                            'service_name' => $serviceName,
+                            'quantity' => $bookingService->quantity,
+                            'price' => $bookingService->price,
+                            'total' => $total,
+                        ];
+                    })->toArray();
+
+                    $servicesTotalPrice = $bookingServices->sum(function ($bookingService) {
+                        return $bookingService->price * $bookingService->quantity;
+                    });
+
+                    $totalPrice = $roomTotalPrice + $servicesTotalPrice;
+                    $paymentType = $roomType->payment_type ?? 'Không cần thanh toán trước';
+
+                    $remainingAmount = null;
+                    if ($paymentType === 'Trả trước một phần') {
+                        $remainingAmount = $totalPrice - ($payment->total_amount ?? 0);
+                    } elseif ($paymentType === 'Không cần thanh toán trước') {
+                        $remainingAmount = $totalPrice;
+                    }
+
+                    $bookingIdForCode = $bookingsCollection->first()->id ?? $booking->id;
+                    $bookingCode = 'BK' . str_pad($bookingIdForCode, 6, '0', STR_PAD_LEFT);
+
+                    $mailData = [
+                        'booking_code' => $bookingCode,
+                        'customer_name' => $user->name ?? 'Quý khách',
+                        'room_type' => $roomType->name ?? '',
+                        'quantity' => $quantity,
+                        'room_numbers' => $roomNumbers,
+                        'check_in' => $checkInFormatted,
+                        'check_out' => $checkOutFormatted,
+                        'room_total_price' => $roomTotalPrice,
+                        'services_total_price' => $servicesTotalPrice,
+                        'total_price' => $totalPrice,
+                        'services' => $servicesList,
+                        'payment_type' => $paymentType,
+                        'payment_amount' => $payment->total_amount,
+                        'need_payment' => true,
+                        'remaining_amount' => $remainingAmount,
+                        'booking_url' => url('/frontend/page/confirmation.html?booking_code=' . $bookingCode),
+                        'support_hotline' => config('app.support_hotline', '1900 113 114 115'),
+                    ];
+
+                    $recipientEmail = $booking->user->email ?? $user->email;
+                    if ($recipientEmail) {
+                        Mail::to($recipientEmail)->send(new BookingConfirmationMail($mailData));
+                    }
+                } catch (\Exception $mailException) {
+                    Log::error('Payment confirmation email failed: ' . $mailException->getMessage(), [
+                        'booking_id' => $booking->id,
+                        'payment_id' => $payment->id,
+                    ]);
+                }
             }
 
             DB::commit();

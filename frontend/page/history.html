@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử đặt phòng - Hotel Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/history.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="history-page">
+        <section class="history-section">
+            <div class="section-header">
+                <h2>Danh sách đặt phòng</h2>
+                <div class="history-filters">
+                    <select id="status-filter">
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="Đã thanh toán">Đã thanh toán</option>
+                        <option value="Chờ xử lý">Chờ xử lý</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="history-loading" class="history-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Đang tải dữ liệu...</span>
+            </div>
+
+            <div id="history-empty" class="history-empty" style="display: none;">
+                <i class="fas fa-calendar-times"></i>
+                <p>Bạn chưa có đặt phòng nào. Hãy đặt phòng để tải trải nghiệm tuyệt vời!</p>
+                <a href="../index.html" class="btn-primary">Bắt đầu đặt phòng</a>
+            </div>
+
+            <div id="history-list" class="history-cards"></div>
+        </section>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/history.js"></script>
+</body>
+</html>
+

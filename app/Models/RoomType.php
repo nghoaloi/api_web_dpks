@@ -43,4 +43,9 @@ class RoomType extends Model
     {
         return $this->hasMany(Review::class, 'type_id');
     }
+
+    public function amenities()
+    {
+        return $this->belongsToMany(Amenity::class, 'room_type_amenity');
+    }
 }

@@ -16,13 +16,13 @@ class RoomTypeController extends Controller
     public function index()
     {
         try{
-            $roomtypes = RoomType::with('images')->latest()->get();
+            $roomtypes = RoomType::with(['images', 'amenities'])->latest()->get();
             
             // Thêm thông tin rating cho mỗi room type
             $roomtypes->transform(function($roomType) {
                 $roomTypeData = $roomType->toArray();
                 
-                // Tính average rating và số lượng reviews
+                
                 $reviews = Review::where('type_id', $roomType->id)->get();
                 $reviewCount = $reviews->count();
                 $avgRating = $reviewCount > 0 ? $reviews->avg('rating') : 0;
@@ -69,7 +69,7 @@ class RoomTypeController extends Controller
     public function show(string $id)
     {
         try {
-            $roomType = RoomType::with('images')->find($id);
+            $roomType = RoomType::with(['images', 'amenities'])->find($id);
             
             if (!$roomType) {
                 return response()->json([
@@ -148,7 +148,7 @@ class RoomTypeController extends Controller
 
             $request->validate([
                 'check_in' => 'required|date',
-                'check_out' => 'required|date|after:check_in',
+                'check_out' => 'required|date|after_or_equal:check_in',
                 'quantity' => 'nullable|integer|min:1|max:10',
             ]);
 

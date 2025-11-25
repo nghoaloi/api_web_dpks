@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoomTypeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\TienichContronller;
+use App\Http\Controllers\ReviewController;
 
 
     Route::prefix('auth')->group(function(){
@@ -12,7 +14,9 @@ use App\Http\Controllers\ServiceController;
         
     });
 
-    Route::middleware('auth:sanctum')->group(function(){
+Route::get('/room-types/{id}/reviews', [ReviewController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function(){
         Route::get('/profile',[AuthController::class,'profile']);
         Route::put('/profile',[AuthController::class,'updateProfile']);
         Route::post('/profile/avatar',[AuthController::class,'updateAvatar']);
@@ -38,19 +42,20 @@ use App\Http\Controllers\ServiceController;
     Route::put('/services/{id}', [ServiceController::class, 'update']);
     Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
-    // bookings (chỉ cho user đã đăng nhập)
+
+    // bookings 
     use App\Http\Controllers\BookingController;
     use App\Http\Controllers\PaymentController;
     use App\Http\Controllers\VNPayController;
-    Route::middleware('auth:sanctum')->group(function(){
+Route::middleware('auth:sanctum')->group(function(){
         Route::get('/bookings', [BookingController::class, 'index']);
         Route::get('/bookings/{id}', [BookingController::class, 'show']);
         Route::post('/bookings', [BookingController::class, 'store']);
         Route::post('/payments/update', [PaymentController::class, 'update']);
-        Route::post('/vnpay/create-payment-url', [VNPayController::class, 'createPaymentUrl']);
+        Route::post('/room-types/{id}/reviews', [ReviewController::class, 'store']);
+        Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
     });
     
     
     Route::get('/vnpay/return', [VNPayController::class, 'return']);
-    Route::post('/vnpay/ipn', [VNPayController::class, 'ipn']); 
 ?>

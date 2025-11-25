@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đặt phòng - Hotel Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/history-detail.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="detail-page">
+        <section class="detail-wrapper">
+            <div class="detail-breadcrumb">
+                <a href="history.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại danh sách đặt phòng
+                </a>
+            </div>
+
+            <div id="detail-loading" class="detail-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Đang tải thông tin đơn đặt phòng...</span>
+            </div>
+
+            <div id="detail-error" class="detail-error" style="display: none;">
+                <i class="fas fa-circle-exclamation"></i>
+                <div>
+                    <h3>Không thể tải dữ liệu</h3>
+                    <p id="detail-error-message">Vui lòng thử lại sau ít phút.</p>
+                </div>
+                <a href="history.html" class="btn-primary">Quay lại lịch sử</a>
+            </div>
+
+            <div id="detail-content" class="detail-content" style="display: none;"></div>
+        </section>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/history-detail.js"></script>
+</body>
+</html>
+

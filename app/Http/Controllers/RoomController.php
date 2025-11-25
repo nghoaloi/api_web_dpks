@@ -19,7 +19,7 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type_id'      => 'required|integer|exists:room_types,id',
+            'type_id'   => 'required|integer|exists:room_types,id',
             'room_number'  => 'required|string|max:255',
             'status'       => 'required|string|in:Còn phòng,Đã có người,Bảo trì',
         ]);
@@ -27,7 +27,7 @@ class RoomController extends Controller
         $room = Room::create($validated);
 
         return response()->json([
-            'success' => true,
+            'success'=>true,
             'message' => 'Phòng đã được thêm thành công!',
             'data'    => $room
         ], 201);

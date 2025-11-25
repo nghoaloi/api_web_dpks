@@ -32,18 +32,26 @@ class ServiceController extends Controller
     // API: Thêm dịch vụ
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'service_name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string'
-        ]);
-
-        $service = Service::create($validatedData);
-
-        return response()->json([
-            'message' => 'Thêm dịch vụ thành công!',
-            'data' => $service
-        ], 201);
+        try{
+            $validatedData = $request->validate([
+                'service_name' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'description' => 'nullable|string'
+            ]);
+    
+            $service = Service::create($validatedData);
+    
+            return response()->json([
+                'message' => 'Thêm dịch vụ thành công!',
+                'data' => $service
+            ], 200);
+        }
+        catch(\Exception $e){
+            return response()->json([
+                'message' => 'Lỗi khi thêm dịch vụ: ' . $e->getMessage()
+            ], 500);
+        }
+        
     }
 
     // API: Cập nhật dịch vụ
