@@ -28,6 +28,6 @@ class BookingService extends Model
 
     public function service()
     {
-        return $this->belongsTo(Service::class, 'service_id');
+        return $this->belongsTo(Service::class, 'service_id')->select(['id','service_name','description']);
     }
 }

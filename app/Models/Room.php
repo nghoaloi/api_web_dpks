@@ -20,7 +20,14 @@ class Room extends Model
     public function roomType()
     {
         // Liên kết tới bảng room_types (khóa ngoại là type_id)
-        return $this->belongsTo(RoomType::class, 'type_id');
+        return $this->belongsTo(RoomType::class, 'type_id')->select (['id', 'name',
+        'base_price',
+        'description',
+        'max_cap',
+        'payment_type',
+        'allow_pet',
+        'single_bed',
+        'double_bed',]);
     }
 
     public function images()

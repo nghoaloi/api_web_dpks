@@ -48,6 +48,8 @@ use App\Http\Controllers\BookingServiceAdminController;
     Route::post('/vnpay/ipn', [VNPayController::class, 'ipn']); 
 
     //api admin
+
+    
     Route::middleware('auth:sanctum')->group(function(){
         // tiện ích
         Route::get('/amenity', [AmenityController::class, 'index']);
@@ -58,7 +60,7 @@ use App\Http\Controllers\BookingServiceAdminController;
         
         Route::get('/amenity-search', [AmenityController::class, 'search']);
         // đặt dịch vụ
-        Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
+        // Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
         Route::get('booking-services/{id}', [BookingServiceAdminController::class, 'show']);
         Route::post('booking-services/', [BookingServiceAdminController::class, 'store']);
         Route::put('booking-services/{id}', [BookingServiceAdminController::class, 'update']);
@@ -78,9 +80,9 @@ use App\Http\Controllers\BookingServiceAdminController;
         // phòng
         Route::get('/rooms', [RoomController::class, 'index']);       
         Route::post('/rooms', [RoomController::class, 'store']);    
-        Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
         Route::put('/rooms/{id}', [RoomController::class, 'update']); 
         Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
+        Route::get('/room/search', [RoomController::class, 'search']);
         // dịch vụ
         Route::get('/services', [ServiceController::class, 'index']);
         Route::get('/services/{id}', [ServiceController::class, 'show']);
@@ -90,6 +92,15 @@ use App\Http\Controllers\BookingServiceAdminController;
         // user
         Route::get('/users', [UserController::class, 'index']);
         Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
+        Route::get('/users/search', [UserController::class, 'search']);
+
         //
     });
+    Route::get('/bookings', [BookingAdminController::class, 'index']);
+    // Route::get('/services', [ServiceController::class, 'index']);
+    Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
+        Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
+
+
+
 ?>

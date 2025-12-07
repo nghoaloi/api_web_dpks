@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
+
+
     //  Lấy danh sách tất cả phòng
     public function index()
     {
@@ -52,7 +54,7 @@ class RoomController extends Controller
     // }
     public function show_by_id($id)
     {
-        $room = Room::find($id);
+        $room = Room::with('roomtype')->find($id);
 
         if (!$room) {
             return response()->json(['message' => 'Không tìm thấy phòng'], 404);
@@ -102,4 +104,32 @@ class RoomController extends Controller
             'message' => 'Phòng đã được xóa!'
         ]);
     }
+    // tìm theo số phòng với mã phòng 
+    public function search(Request $request)
+    {
+
+        $room_number = $request->input('room_number');
+        $id = $request->input('id');
+
+        $query = Room::query();
+
+        // Tìm theo ID nếu có
+        if (!empty($id)) {
+            $query->where('id', $id);
+        }
+
+        // Tìm theo số phòng nếu có
+        if (!empty($room_number)) {
+            $query->where('room_number', 'LIKE', '%' . $room_number . '%');
+        }
+
+        // Load quan hệ roomType
+        $rooms = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $rooms
+        ]);
+    }
+
 }

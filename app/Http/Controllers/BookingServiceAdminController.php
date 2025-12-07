@@ -10,8 +10,13 @@ class BookingServiceAdminController extends Controller
     //  Lấy danh sách tất cả booking_service
     public function index()
     {
-        $bookingServices = BookingService::all();
-        return response()->json($bookingServices);
+        // Lấy tất cả booking_service kèm thông tin booking và service
+        $bookingServices = BookingService::with(['booking.user', 'service'])->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $bookingServices
+        ]);
     }
 
     // Lấy thông tin chi tiết 1 booking_service

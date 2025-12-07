@@ -37,4 +37,29 @@ class UserController extends Controller
             'status' => $user->status
         ]);
     }
+    public function search(Request $request)
+    {
+        $fullname = $request->input('fullname');
+        $phone = $request->input('phone');
+
+        $query = User::query();
+
+        // Nếu có fullname
+        if (!empty($fullname)) {
+            $query->where('fullname', 'LIKE', '%' . $fullname . '%');
+        }
+
+        // Nếu có phone
+        if (!empty($phone)) {
+            $query->where('phone', 'LIKE', '%' . $phone . '%');
+        }
+
+        $users = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ], 200);
+    }
+
 }

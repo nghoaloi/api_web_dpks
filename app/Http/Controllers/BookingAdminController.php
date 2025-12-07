@@ -8,20 +8,20 @@ use Illuminate\Http\Request;
 class BookingAdminController extends Controller
 {
     // Lấy toàn bộ danh sách booking
-    public function index()
-    {
-        $bookings = Booking::all();
-        return response()->json($bookings);
-    }
     // public function index()
     // {
-    //     $bookings = Booking::with(['user', 'room', 'services', 'payment'])->get();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $bookings
-    //     ], 200);
+    //     $bookings = Booking::all();
+    //     return response()->json($bookings);
     // }
+    public function index()
+    {
+        $bookings = Booking::with(['user', 'room.roomType', 'bookingServices.service', 'payment'])->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $bookings
+        ], 200);
+    }
     // Lấy booking theo ID
     // public function show($id)
     // {

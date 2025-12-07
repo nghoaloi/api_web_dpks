@@ -31,11 +31,16 @@ class Booking extends Model
     {
         return $this->belongsTo(Room::class, 'room_id');
     }
+    public function bookingServices()
+    {
+        return $this->hasMany(BookingService::class, 'booking_id', 'id');
+    }
 
     public function services()
     {
-        return $this->hasMany(BookingService::class, 'booking_id');
+        return $this->belongsToMany(Service::class, 'booking_service', 'booking_id', 'service_id');
     }
+
 
     public function payment()
     {
