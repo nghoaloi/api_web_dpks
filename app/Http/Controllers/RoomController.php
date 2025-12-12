@@ -122,7 +122,12 @@ class RoomController extends Controller
         if (!empty($room_number)) {
             $query->where('room_number', 'LIKE', '%' . $room_number . '%');
         }
-
+        if ($request->tang){
+            $query->where('tang', $request->tang);
+        }
+        if ($request->toa){
+            $query->where('toa', $request->toa);
+        }
         // Load quan hệ roomType
         $rooms = $query->get();
 

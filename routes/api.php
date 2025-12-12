@@ -60,11 +60,13 @@ use App\Http\Controllers\BookingServiceAdminController;
         
         Route::get('/amenity-search', [AmenityController::class, 'search']);
         // đặt dịch vụ
-        // Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
+        Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
         Route::get('booking-services/{id}', [BookingServiceAdminController::class, 'show']);
         Route::post('booking-services/', [BookingServiceAdminController::class, 'store']);
         Route::put('booking-services/{id}', [BookingServiceAdminController::class, 'update']);
         Route::delete('booking-services/{id}', [BookingServiceAdminController::class, 'destroy']);
+        Route::get('booking-services-idbooking/{id}', [BookingServiceAdminController::class, 'getByBookingId']);
+
         // laoị phòng
         Route::get('room-types/', [RoomTypeAdminController::class, 'index']);              
         Route::get('room-types/{id}', [RoomTypeAdminController::class, 'show_by_id']);      
@@ -77,6 +79,8 @@ use App\Http\Controllers\BookingServiceAdminController;
         Route::post('/bookings', [BookingAdminController::class, 'store']);
         Route::put('/bookings/{id}', [BookingAdminController::class, 'update']);
         Route::delete('/bookings/{id}', [BookingAdminController::class, 'destroy']);
+        Route::delete('/bookings/{id}/force-delete', [BookingAdminController::class, 'forceDelete']);
+
         // phòng
         Route::get('/rooms', [RoomController::class, 'index']);       
         Route::post('/rooms', [RoomController::class, 'store']);    
@@ -96,10 +100,10 @@ use App\Http\Controllers\BookingServiceAdminController;
 
         //
     });
-    Route::get('/bookings', [BookingAdminController::class, 'index']);
+    // Route::get('/bookings', [BookingAdminController::class, 'index']);
     // Route::get('/services', [ServiceController::class, 'index']);
-    Route::get('booking-services/', [BookingServiceAdminController::class, 'index']);
-        Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
+    // Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
+
 
 
 

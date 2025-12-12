@@ -13,7 +13,7 @@ class BookingServiceAdminController extends Controller
         // Lấy tất cả booking_service kèm thông tin booking và service
         $bookingServices = BookingService::with(['booking.user', 'service'])->get();
 
-        return response()->json([
+        return response()->json([   
             'success' => true,
             'data' => $bookingServices
         ]);
@@ -36,6 +36,26 @@ class BookingServiceAdminController extends Controller
             'data' => $bookingService
         ]);
     }
+    public function getByBookingId($booking_id)
+{
+    // Kiểm tra booking_id hợp lệ
+    if (!$booking_id || !is_numeric($booking_id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'booking_id không hợp lệ'
+        ], 400);
+    }
+
+    // Lấy danh sách dịch vụ theo booking_id, kèm theo thông tin service
+    $services = BookingService::where('booking_id', $booking_id)
+        ->with('service')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $services
+    ], 200);
+}
 
     //  Thêm mới booking_service
     public function store(Request $request)
@@ -103,4 +123,6 @@ class BookingServiceAdminController extends Controller
             'message' => 'Xóa dịch vụ đặt phòng thành công!'
         ]);
     }
+
+
 }

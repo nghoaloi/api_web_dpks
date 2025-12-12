@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Models\BookingService;
 
 class BookingAdminController extends Controller
 {
@@ -61,9 +63,10 @@ class BookingAdminController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'room_id' => 'required|exists:rooms,id',
-            'thoi_gian_den_du_kien' => 'nullable|date_format:H:i:s',
+            'arrival_time' => 'nullable|date_format:H:i:s',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after_or_equal:check_in',
+            'special_requests'=>'nullable|string|max:255',
             'total_price' => 'nullable|numeric|min:0',
             'status' => 'nullable|in:Chờ xử lý,Đã thanh toán,Đã hủy'
         ]);
@@ -143,4 +146,27 @@ class BookingAdminController extends Controller
             'message' => 'Xoá booking thành công'
         ], 200);
     }
+
+    public function forceDelete($id)
+{
+    $booking = Booking::find($id);
+
+    if (!$booking) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Không tìm thấy booking'
+        ], 404);
+    }
+
+    // Xoá tất cả dịch vụ của booking
+    BookingService::where('booking_id', $id)->delete();
+
+    // Xoá booking
+    $booking->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Đã xoá booking và toàn bộ dịch vụ đi kèm!'
+    ], 200);
+}
 }
