@@ -103,7 +103,11 @@ use App\Http\Controllers\BookingServiceAdminController;
     // Route::get('/bookings', [BookingAdminController::class, 'index']);
     // Route::get('/services', [ServiceController::class, 'index']);
     // Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
+    Route::get('/booking/today', [BookingAdminController::class, 'booking_today']);
+    Route::get('/booking/month', [BookingAdminController::class, 'booking_month']);
 
+    Route::get('/booking-service/today', [BookingServiceAdminController::class, 'booking_service_today']);
+    Route::get('/booking-service/month', [BookingServiceAdminController::class, 'booking_service_month']);
 
 
 

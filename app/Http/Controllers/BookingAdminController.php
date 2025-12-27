@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -169,4 +170,33 @@ class BookingAdminController extends Controller
         'message' => 'Đã xoá booking và toàn bộ dịch vụ đi kèm!'
     ], 200);
 }
+// số đặt phòng tong ngày
+public function booking_today()
+    {
+        // Ngày hiện tại
+        $today = Carbon::today();
+        // Tổng số booking trong ngày
+        $totalToday = Booking::whereDate('created_at', $today)->count();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'today' => $totalToday
+            ]
+        ],200);
+    }
+    //số đật phòng trong tháng
+    public function booking_month(){
+         // Tháng hiện tại
+        $now = Carbon::now();
+        // Tổng số booking trong tháng
+        $totalThisMonth = Booking::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'this_month' => $totalThisMonth,
+            ]
+        ],200);
+    }
 }

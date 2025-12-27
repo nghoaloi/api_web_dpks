@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
 
 use App\Models\BookingService;
 use Illuminate\Http\Request;
@@ -123,6 +124,35 @@ class BookingServiceAdminController extends Controller
             'message' => 'Xóa dịch vụ đặt phòng thành công!'
         ]);
     }
+    // đặt dịch vụ trong ngày
+public function booking_service_today()
+{
+    $today = Carbon::today();
 
+    $totalToday = BookingService::whereDate('created_at', $today)->count();
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'today' => $totalToday
+        ]
+    ], 200);
+}
+// đặt dịch vụ trong tháng
+public function booking_service_month()
+{
+    $now = Carbon::now();
+
+    $totalThisMonth = BookingService::whereYear('created_at', $now->year)
+        ->whereMonth('created_at', $now->month)
+        ->count();
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'this_month' => $totalThisMonth
+        ]
+    ], 200);
+}
 
 }
