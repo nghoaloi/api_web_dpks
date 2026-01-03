@@ -9,6 +9,11 @@ use App\Http\Controllers\RoomTypeAdminController;
 use App\Http\Controllers\AmenityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BookingServiceAdminController;
+use App\Http\Controllers\RoomTypeAmenityController;
+// voucher
+use App\Http\Controllers\UserVoucherAdminController;
+use App\Http\Controllers\VoucherAdminController;
+
     Route::prefix('auth')->group(function(){
         Route::post('/login',[AuthController::class,'login']);
         Route::post('/register',[AuthController::class,'register']);
@@ -43,13 +48,9 @@ use App\Http\Controllers\BookingServiceAdminController;
         Route::post('/vnpay/create-payment-url', [VNPayController::class, 'createPaymentUrl']);
     });
     
-    
     Route::get('/vnpay/return', [VNPayController::class, 'return']);
     Route::post('/vnpay/ipn', [VNPayController::class, 'ipn']); 
-
     //api admin
-
-    
     Route::middleware('auth:sanctum')->group(function(){
         // tiện ích
         Route::get('/amenity', [AmenityController::class, 'index']);
@@ -97,18 +98,38 @@ use App\Http\Controllers\BookingServiceAdminController;
         Route::get('/users', [UserController::class, 'index']);
         Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
         Route::get('/users/search', [UserController::class, 'search']);
+        // thêm xoá tiện ích của phòng
+        Route::post('/room-type-amenities', [RoomTypeAmenityController::class, 'store']);
+        Route::delete('/room-type-amenities/{id}', [RoomTypeAmenityController::class, 'destroy']);
+        // lấy danh sách tiện tích của loại phòng    
+        Route::get('/room-types-with-amenities',[RoomTypeAdminController::class, 'getRoomTypesWithAmenities']);
+        // RoomTypeAmenityController
+        Route::post('/room-type-amenities/sync',[RoomTypeAmenityController::class, 'syncAmenities']);
+        // api dashboad
+        Route::get('/booking/today', [BookingAdminController::class, 'booking_today']);
+        Route::get('/booking/month', [BookingAdminController::class, 'booking_month']);
 
-        //
+        Route::get('/booking-service/today', [BookingServiceAdminController::class, 'booking_service_today']);
+        Route::get('/booking-service/month', [BookingServiceAdminController::class, 'booking_service_month']);
+
+        Route::get('/room-types/{roomTypeId}/amenities',[RoomTypeAmenityController::class, 'getAmenitiesOfRoomType']);
+        Route::post('/room-type-amenities/sync',[RoomTypeAmenityController::class, 'syncAmenities']);
+        // voucher
+        Route::get('/getvoucher', [VoucherAdminController::class, 'index']);     
+        Route::get('/getvoucherid/{id}', [VoucherAdminController::class, 'show']);    
+        Route::post('/themvoucher', [VoucherAdminController::class, 'store']);     
+        Route::put('/capnhatvoucher/{id}', [VoucherAdminController::class, 'update']);  
+        Route::delete('/xoavoucher/{id}', [VoucherAdminController::class, 'destroy']); 
+        // user voucher
+        Route::get('/getuservoucher', [UserVoucherAdminController::class, 'index']);
+        Route::get('/getuservoucherid/{id}', [UserVoucherAdminController::class, 'show']);
+        Route::post('/themuservoucher', [UserVoucherAdminController::class, 'store']);
+        Route::put('/capnhatuservoucher/{id}', [UserVoucherAdminController::class, 'update']);
+        Route::delete('/xoauservoucher/{id}', [UserVoucherAdminController::class, 'destroy']);
     });
     // Route::get('/bookings', [BookingAdminController::class, 'index']);
     // Route::get('/services', [ServiceController::class, 'index']);
     // Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
-    Route::get('/booking/today', [BookingAdminController::class, 'booking_today']);
-    Route::get('/booking/month', [BookingAdminController::class, 'booking_month']);
-
-    Route::get('/booking-service/today', [BookingServiceAdminController::class, 'booking_service_today']);
-    Route::get('/booking-service/month', [BookingServiceAdminController::class, 'booking_service_month']);
-
-
+    // Route::get('/getvoucher', [VoucherAdminController::class, 'index']);      
 
 ?>

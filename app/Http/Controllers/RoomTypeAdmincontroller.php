@@ -1,6 +1,5 @@
 <?php
-
- namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
  use App\Models\RoomType;
  use Illuminate\Http\Request;
@@ -165,4 +164,15 @@
              ], 500);
          }
      }
- }
+     // lấy danh sách tiện ích của mỗi loại phòng
+    public function getRoomTypesWithAmenities()
+    {
+        $roomTypes = RoomType::with('amenities')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $roomTypes
+        ]);
+    }
+
+}

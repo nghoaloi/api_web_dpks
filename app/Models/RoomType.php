@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\Amenity;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,5 +43,15 @@ class RoomType extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class, 'type_id');
+    }
+        
+    public function amenities()
+    {
+        return $this->belongsToMany(
+            Amenity::class,
+            'room_type_amenity',
+            'room_type_id',
+            'amenity_id'
+        );
     }
 }
