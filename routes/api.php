@@ -67,6 +67,7 @@ use App\Http\Controllers\VoucherAdminController;
         Route::put('booking-services/{id}', [BookingServiceAdminController::class, 'update']);
         Route::delete('booking-services/{id}', [BookingServiceAdminController::class, 'destroy']);
         Route::get('booking-services-idbooking/{id}', [BookingServiceAdminController::class, 'getByBookingId']);
+        Route::delete('/booking-services/by-booking/{bookingId}', [BookingServiceController::class, 'deleteByBooking']);
 
         // laoị phòng
         Route::get('room-types/', [RoomTypeAdminController::class, 'index']);              
@@ -75,8 +76,8 @@ use App\Http\Controllers\VoucherAdminController;
         Route::put('room-types/{id}', [RoomTypeAdminController::class, 'update']);          
         Route::delete('room-types/{id}', [RoomTypeAdminController::class, 'destroy']);      
         // đặt phòng
-        Route::get('/bookings', [BookingAdminController::class, 'index']);
         Route::get('/bookings/{id}', [BookingAdminController::class, 'show']);
+        Route::get('/bookings', [BookingAdminController::class, 'index']);
         Route::post('/bookings', [BookingAdminController::class, 'store']);
         Route::put('/bookings/{id}', [BookingAdminController::class, 'update']);
         Route::delete('/bookings/{id}', [BookingAdminController::class, 'destroy']);
@@ -127,7 +128,8 @@ use App\Http\Controllers\VoucherAdminController;
         Route::put('/capnhatuservoucher/{id}', [UserVoucherAdminController::class, 'update']);
         Route::delete('/xoauservoucher/{id}', [UserVoucherAdminController::class, 'destroy']);
     });
-    // Route::get('/bookings', [BookingAdminController::class, 'index']);
+    
+
     // Route::get('/services', [ServiceController::class, 'index']);
     // Route::get('/rooms/{id}', [RoomController::class, 'show_by_id']); 
     // Route::get('/getvoucher', [VoucherAdminController::class, 'index']);      

@@ -42,9 +42,9 @@ class BookingAdminController extends Controller
     //         'data' => $booking
     //     ], 200);
     // }
-        public function show($id)
+    public function show($id)
     {
-        $booking = Booking::find($id);
+        $booking = Booking::with('user', 'room.roomType', 'bookingServices.service', 'payment')-> find($id);
 
         if (!$booking) {
             return response()->json([

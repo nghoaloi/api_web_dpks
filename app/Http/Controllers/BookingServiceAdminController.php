@@ -37,7 +37,7 @@ class BookingServiceAdminController extends Controller
             'data' => $bookingService
         ]);
     }
-    public function getByBookingId($booking_id)
+public function getByBookingId($booking_id)
 {
     // Kiểm tra booking_id hợp lệ
     if (!$booking_id || !is_numeric($booking_id)) {
@@ -57,6 +57,17 @@ class BookingServiceAdminController extends Controller
         'data' => $services
     ], 200);
 }
+// xoá theo booking id
+public function deleteByBooking($bookingId)
+{
+    BookingService::where('booking_id', $bookingId)->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Đã xoá dịch vụ cũ'
+    ]);
+}
+
 
     //  Thêm mới booking_service
     public function store(Request $request)
