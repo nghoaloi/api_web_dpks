@@ -7,6 +7,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TienichContronller;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ContactController;
 
 
     Route::prefix('auth')->group(function(){
@@ -16,6 +17,9 @@ use App\Http\Controllers\VoucherController;
     });
 
 Route::get('/room-types/{id}/reviews', [ReviewController::class, 'index']);
+
+// Contact form (public)
+Route::post('/contact', [ContactController::class, 'send']);
 
 Route::middleware('auth:sanctum')->group(function(){
         Route::get('/profile',[AuthController::class,'profile']);

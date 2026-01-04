@@ -48,7 +48,12 @@ async function loadUserProfile() {
     }
 }
 
+let currentUserData = null;
+
 function populateProfileInfo(userData) {
+    currentUserData = userData;
+    
+
     document.getElementById('fullname').textContent = userData.fullname || 'Chưa cập nhật';
     document.getElementById('email').textContent = userData.email || 'Chưa cập nhật';
     document.getElementById('phone').textContent = userData.phone || 'Chưa cập nhật';
@@ -60,7 +65,11 @@ function populateProfileInfo(userData) {
     document.getElementById('gender').textContent = genderText;
     
     document.getElementById('address').textContent = userData.address || 'Chưa cập nhật';
-}
+
+    document.getElementById('fullname-input').value = userData.fullname || '';
+    document.getElementById('phone-input').value = userData.phone || '';
+    document.getElementById('gender-input').value = userData.gender !== null && userData.gender !== undefined ? String(userData.gender) : '';
+    document.getElementById('address-input').value = userData.address || '';}
 
 function renderProfileAvatar(userData) {
     const avatarImg = document.getElementById('profile-avatar');
@@ -127,7 +136,195 @@ function updateHeaderUserInfo() {
     }
 }
 
+
+function toggleEditMode(isEdit) {
+    const displayElements = document.querySelectorAll('.info-display');
+    const inputElements = document.querySelectorAll('.info-input');
+    const editBtn = document.getElementById('btn-edit-profile');
+    const actionsDiv = document.getElementById('profile-actions');
+    
+    if (isEdit) {
+
+        displayElements.forEach(el => {
+            if (el.id !== 'email') el.style.display = 'none';
+        });
+        inputElements.forEach(el => el.style.display = 'block');
+        editBtn.style.display = 'none';
+        actionsDiv.style.display = 'flex';
+    } else {
+
+        displayElements.forEach(el => el.style.display = 'inline');
+        inputElements.forEach(el => el.style.display = 'none');
+        editBtn.style.display = 'inline-block';
+        actionsDiv.style.display = 'none';
+    }
+}
+
+function cancelEdit() {
+  
+    if (currentUserData) {
+        populateProfileInfo(currentUserData);
+    }
+    toggleEditMode(false);
+}
+
+async function saveProfile() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        alert('Vui lòng đăng nhập lại');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    const fullname = document.getElementById('fullname-input').value.trim();
+    const phone = document.getElementById('phone-input').value.trim();
+    const gender = document.getElementById('gender-input').value;
+    const address = document.getElementById('address-input').value.trim();
+    
+
+    if (!fullname) {
+        alert('Vui lòng nhập họ và tên');
+        return;
+    }
+    
+    if (fullname.length > 120) {
+        alert('Họ và tên không được vượt quá 120 ký tự');
+        return;
+    }
+    
+   
+    if (phone) {
+        if (phone.length < 10) {
+            alert('Số điện thoại phải có ít nhất 10 ký tự');
+            return;
+        }
+        if (phone.length > 14) {
+            alert('Số điện thoại không được vượt quá 14 ký tự');
+            return;
+        }
+    }
+    
+    if (address && address.length > 255) {
+        alert('Địa chỉ không được vượt quá 255 ký tự');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('btn-save-profile');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    
+    try {
+        const payload = {
+            fullname: fullname,
+            phone: phone || null, 
+            gender: (gender && gender !== '') ? parseInt(gender) : null,
+            address: address || null
+        };
+        
+        const response = await fetch(API_BASE + 'profile', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
+            alert('Lỗi khi xử lý phản hồi từ server');
+            return;
+        }
+        
+        if (response.ok) {  
+            currentUserData = result.data;
+            populateProfileInfo(result.data);
+            toggleEditMode(false);
+            
+            localStorage.setItem('userData', JSON.stringify(result.data));
+            
+            updateHeaderUserInfo();
+            
+            alert('Cập nhật thông tin thành công');
+        } else {
+            let errorMsg = 'Cập nhật thất bại';
+            
+            console.log('Error response:', result);
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (response.status === 422 && result.errors) {
+                const errorMessages = [];
+                Object.keys(result.errors).forEach(field => {
+                    const fieldErrors = result.errors[field];
+                    if (Array.isArray(fieldErrors)) {
+                        fieldErrors.forEach(err => {
+                            errorMessages.push(err);
+                        });
+                    } else if (typeof fieldErrors === 'string') {
+                        errorMessages.push(fieldErrors);
+                    }
+                });
+                
+                if (errorMessages.length > 0) {
+                    errorMsg = errorMessages.join('\n');
+                } else {
+                    errorMsg = result.message || 'Cập nhật thất bại';
+                }
+            } else if (result.message) {
+                // Ưu tiên hiển thị message từ backend (đã được format)
+                errorMsg = result.message;
+            } else if (result.error) {
+                // Nếu có error field, kiểm tra xem có phải lỗi database không
+                const errorDetail = result.error;
+                if (errorDetail.includes('Data too long for column') && errorDetail.includes('phone')) {
+                    errorMsg = 'Số điện thoại quá dài. Vui lòng nhập số điện thoại từ 10 đến 14 ký tự';
+                } else if (errorDetail.includes('Data too long for column') && errorDetail.includes('fullname')) {
+                    errorMsg = 'Họ và tên quá dài. Vui lòng nhập tên từ 1 đến 120 ký tự';
+                } else if (errorDetail.includes('Data too long for column') && errorDetail.includes('address')) {
+                    errorMsg = 'Địa chỉ quá dài. Vui lòng nhập địa chỉ tối đa 255 ký tự';
+                } else {
+                    // Hiển thị message nếu có, không thì hiển thị error
+                    errorMsg = result.message || errorDetail;
+                }
+            } else {    
+                errorMsg = `Cập nhật thất bại (Status: ${response.status})`;
+            }
+            
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('Lỗi khi cập nhật thông tin: ' + error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    const editBtn = document.getElementById('btn-edit-profile');
+    const saveBtn = document.getElementById('btn-save-profile');
+    const cancelBtn = document.getElementById('btn-cancel-edit');
+    
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            toggleEditMode(true);
+        });
+    }
+    
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveProfile);
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', cancelEdit);
+    }
+    
     const fileInput = document.getElementById('avatar-file');
     const labelFile = document.getElementById('label-file');
     const previewContainer = document.getElementById('preview-container');
@@ -187,6 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await res.json();
                 if (res.ok) {
+                    currentUserData = data.data;
                     localStorage.setItem('userData', JSON.stringify(data.data));
                     renderProfileAvatar(data.data);
                     if (fileInput) fileInput.value = '';

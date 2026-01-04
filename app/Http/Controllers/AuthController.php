@@ -165,10 +165,37 @@ class AuthController extends Controller
                 'gender'=>'nullable|integer|in:0,1',
                 'address'=>'nullable|string|max:255',
                 'avatar'=>'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            ], [
+                'fullname.required' => 'Họ và tên là bắt buộc',
+                'fullname.max' => 'Họ và tên không được vượt quá 120 ký tự',
+                'phone.min' => 'Số điện thoại phải có ít nhất 10 ký tự',
+                'phone.max' => 'Số điện thoại không được vượt quá 14 ký tự',
+                'gender.integer' => 'Giới tính không hợp lệ',
+                'gender.in' => 'Giới tính phải là Nam (0) hoặc Nữ (1)',
+                'address.max' => 'Địa chỉ không được vượt quá 255 ký tự',
+                'avatar.image' => 'File phải là hình ảnh',
+                'avatar.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp',
+                'avatar.max' => 'Kích thước hình ảnh không được vượt quá 2MB'
             ]);
 
             $user=$request->user();
             $payload = $request->only(['fullname','phone','gender','address']);
+            
+            // Đảm bảo phone là string và có độ dài đúng
+            if (isset($payload['phone']) && $payload['phone'] !== null) {
+                $payload['phone'] = (string) $payload['phone'];
+                // Kiểm tra lại độ dài sau khi convert
+                if (strlen($payload['phone']) > 14) {
+                    throw ValidationException::withMessages([
+                        'phone' => ['Số điện thoại không được vượt quá 14 ký tự']
+                    ]);
+                }
+                if (strlen($payload['phone']) < 10) {
+                    throw ValidationException::withMessages([
+                        'phone' => ['Số điện thoại phải có ít nhất 10 ký tự']
+                    ]);
+                }
+            }
 
             if ($request->hasFile('avatar')) {
                 $path = $request->file('avatar')->store('avatars', 'public');
@@ -180,7 +207,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'message'=>'Cập nhật thông tin thành công',
-                'data'=>$user
+                'data'=>$user->fresh()
             ],200);
         }
         catch(ValidationException $e){
@@ -190,10 +217,24 @@ class AuthController extends Controller
             ],422);
         }
         catch(\Exception $e){
+            $errorMessage = 'Cập nhật thông tin thất bại';
+            $errorDetail = $e->getMessage();
+            
+            // Kiểm tra lỗi database về độ dài dữ liệu
+            if (strpos($errorDetail, 'Data too long for column') !== false) {
+                if (strpos($errorDetail, 'phone') !== false) {
+                    $errorMessage = 'Số điện thoại quá dài. Vui lòng nhập số điện thoại từ 10 đến 14 ký tự';
+                } else if (strpos($errorDetail, 'fullname') !== false) {
+                    $errorMessage = 'Họ và tên quá dài. Vui lòng nhập tên từ 1 đến 120 ký tự';
+                } else if (strpos($errorDetail, 'address') !== false) {
+                    $errorMessage = 'Địa chỉ quá dài. Vui lòng nhập địa chỉ tối đa 255 ký tự';
+                }
+            }
+            
             return response()->json([
-                'message'=>'Cập nhật thông tin thất bại',
-                'error'=>$e->getMessage()
-            ],500);
+                'message' => $errorMessage,
+                'error' => $errorDetail
+            ], 500);
         }
     }
     

@@ -20,9 +20,74 @@
             if (el) el.addEventListener('change', onFilterChange);
         });
 
+        // Contact modal handlers - đợi header load xong
+        setTimeout(() => {
+            initContactModal();
+        }, 500);
+
+        // Hoặc dùng event delegation để đảm bảo hoạt động
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.id === 'contact-btn' || e.target.closest('#contact-btn'))) {
+                e.preventDefault();
+                const contactModal = document.getElementById('contact-modal');
+                if (contactModal) {
+                    contactModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            if (e.target && (e.target.id === 'mobile-contact-btn' || e.target.closest('#mobile-contact-btn'))) {
+                e.preventDefault();
+                const contactModal = document.getElementById('contact-modal');
+                if (contactModal) {
+                    contactModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                    }
+                }
+            }
+        });
+
         fetchRoomTypes();
         personalizeHero();
     });
+
+    function initContactModal() {
+        const contactModal = document.getElementById('contact-modal');
+        const contactModalClose = document.getElementById('contact-modal-close');
+        const contactModalOverlay = contactModal?.querySelector('.contact-modal-overlay');
+        const contactForm = document.getElementById('contact-form');
+
+        // Close modal function
+        function closeModal() {
+            if (contactModal) {
+                contactModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (contactModalClose) {
+            contactModalClose.addEventListener('click', closeModal);
+        }
+
+        if (contactModalOverlay) {
+            contactModalOverlay.addEventListener('click', closeModal);
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && contactModal && contactModal.style.display === 'flex') {
+                closeModal();
+            }
+        });
+
+        // Contact form submit
+        if (contactForm) {
+            contactForm.addEventListener('submit', handleContactSubmit);
+        }
+    }
 
     async function fetchRoomTypes(){
         try{
@@ -67,6 +132,73 @@
     function onSearch(){
         onFilterChange();
         renderRooms();
+    }
+
+    async function handleContactSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = {
+            name: document.getElementById('contact-name').value.trim(),
+            email: document.getElementById('contact-email').value.trim(),
+            phone: document.getElementById('contact-phone').value.trim(),
+            subject: document.getElementById('contact-subject').value,
+            message: document.getElementById('contact-message').value.trim()
+        };
+
+        // Validation
+        if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+            alert('Vui lòng điền đầy đủ các trường bắt buộc');
+            return;
+        }
+
+        if (!formData.email.includes('@')) {
+            alert('Email không hợp lệ');
+            return;
+        }
+
+        const submitBtn = form.querySelector('.btn-submit');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+
+        try {
+            const response = await fetch(API_BASE + 'contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(result.message || 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.');
+                form.reset();
+                
+                // Close modal after 1 second
+                setTimeout(() => {
+                    const contactModal = document.getElementById('contact-modal');
+                    if (contactModal) {
+                        contactModal.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                }, 1000);
+            } else {
+                const errorMsg = result.errors 
+                    ? Object.values(result.errors).flat().join('\n')
+                    : (result.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+                alert(errorMsg);
+            }
+        } catch (error) {
+            console.error('Contact form error:', error);
+            alert('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
     }
 
     function renderRooms(){

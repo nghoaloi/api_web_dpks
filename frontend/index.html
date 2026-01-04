@@ -6,6 +6,8 @@
     <title>Hotel Booking - Đặt phòng khách sạn trực tuyến</title>
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/contact-modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .main-content {
@@ -67,7 +69,98 @@
         </section>
     </main>
 
+    <div id="contact-modal" class="contact-modal" style="display: none;">
+        <div class="contact-modal-overlay"></div>
+        <div class="contact-modal-content">
+            <button class="contact-modal-close" id="contact-modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="contact-modal-header">
+                <h2>Liên hệ với chúng tôi</h2>
+                <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi</p>
+            </div>
+            <div class="contact-modal-body">
+                <div class="contact-info-sidebar">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-details">
+                            <h3>Địa chỉ</h3>
+                            <p>2581 Huỳnh Tấn Phát, Phú Xuân, Nhà Bè<br>Thành phố Hồ Chí Minh, Việt Nam</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-details">
+                            <h3>Điện thoại</h3>
+                            <p>Hotline: <a href="tel:1900123987">1900123987</a><br>Mobile: <a href="tel:0334153621">0334153621</a></p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-details">
+                            <h3>Email</h3>
+                            <p>Hỗ trợ: <a href="mailto:nguyenloi142@gmail.com">nguyenloi142@gmail.com</a><br>Liên hệ: <a href="mailto:nguyenloi1412@gmail.com">nguyenloi1412@gmail.com</a></p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-details">
+                            <h3>Giờ làm việc</h3>
+                            <p>Thứ 2 - Chủ nhật: 8:00 - 22:00<br>Hỗ trợ 24/7 qua hotline</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-sidebar">
+                    <form id="contact-form" class="contact-form">
+                        <h3>Gửi tin nhắn cho chúng tôi</h3>
+                        <div class="form-group">
+                            <label for="contact-name">Họ và tên *</label>
+                            <input type="text" id="contact-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email *</label>
+                            <input type="email" id="contact-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-phone">Số điện thoại</label>
+                            <input type="tel" id="contact-phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-subject">Chủ đề *</label>
+                            <select id="contact-subject" name="subject" required>
+                                <option value="">Chọn chủ đề</option>
+                                <option value="booking">Đặt phòng</option>
+                                <option value="cancel">Hủy đặt phòng</option>
+                                <option value="payment">Thanh toán</option>
+                                <option value="voucher">Voucher</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-message">Nội dung *</label>
+                            <textarea id="contact-message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i> Gửi tin nhắn
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container"></div>
+
     <script src="js/header-loader.js"></script>
+    <script src="js/footer-loader.js"></script>
     <script src="js/home.js"></script>
 </body>
 </html>

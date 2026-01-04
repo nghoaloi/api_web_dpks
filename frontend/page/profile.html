@@ -6,6 +6,7 @@
     <title>Thông tin cá nhân - Hotel Booking</title>
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/profile.css">
+    <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -17,6 +18,11 @@
         <div class="container">
             <div class="profile-container">
                 <div class="profile-content">
+                    <div class="profile-header-actions">
+                        <button id="btn-edit-profile" class="btn-edit">
+                            <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+                        </button>
+                    </div>
                     <div class="profile-info">
                         <div class="avatar-section">
                             <div class="avatar-wrapper">
@@ -35,27 +41,44 @@
                         </div>
                         <div class="info-item">
                             <label>Họ và tên:</label>
-                            <span id="fullname">-</span>
+                            <span id="fullname" class="info-display">-</span>
+                            <input type="text" id="fullname-input" class="info-input" style="display:none;" maxlength="120">
                         </div>
                         
                         <div class="info-item">
                             <label>Email:</label>
-                            <span id="email">-</span>
+                            <span id="email" class="info-display">-</span>
                         </div>
                         
                         <div class="info-item">
                             <label>Số điện thoại:</label>
-                            <span id="phone">-</span>
+                            <span id="phone" class="info-display">-</span>
+                            <input type="text" id="phone-input" class="info-input" style="display:none;" maxlength="14">
                         </div>
                         
                         <div class="info-item">
                             <label>Giới tính:</label>
-                            <span id="gender">-</span>
+                            <span id="gender" class="info-display">-</span>
+                            <select id="gender-input" class="info-input" style="display:none;">
+                                <option value="">Chọn giới tính</option>
+                                <option value="0">Nam</option>
+                                <option value="1">Nữ</option>
+                            </select>
                         </div>
                         
                         <div class="info-item">
                             <label>Địa chỉ:</label>
-                            <span id="address">-</span>
+                            <span id="address" class="info-display">-</span>
+                            <textarea id="address-input" class="info-input" style="display:none;" rows="3" maxlength="255"></textarea>
+                        </div>
+                        
+                        <div class="profile-actions" id="profile-actions" style="display:none;">
+                            <button id="btn-save-profile" class="btn-save">
+                                <i class="fas fa-save"></i> Lưu thay đổi
+                            </button>
+                            <button id="btn-cancel-edit" class="btn-cancel">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -63,7 +86,10 @@
         </div>
     </main>
 
+    <div id="footer-container"></div>
+
     <script src="../js/header-loader.js"></script>
+    <script src="../js/footer-loader.js"></script>
     <script src="../js/profile.js"></script>
 </body>
 </html>
