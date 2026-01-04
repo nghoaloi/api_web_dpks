@@ -222,9 +222,22 @@
         const items = bookings.map((b, index) => {
             const roomNumber = b.room?.room_number || `Phòng #${index + 1}`;
             const type = b.room?.room_type?.name || b.room?.roomType?.name || fallbackRoomType;
+            const room = b.room;
+            
+            // Thông tin chi tiết phòng
+            const details = [];
+            if (room?.floor) details.push(`Lầu: ${escapeHtml(room.floor)}`);
+            if (room?.direction) details.push(`Hướng: ${escapeHtml(room.direction)}`);
+            if (room?.area) details.push(`Diện tích: ${Number(room.area).toLocaleString('vi-VN')} m²`);
+            if (room?.has_balcony !== undefined && room?.has_balcony !== null) {
+                details.push(room.has_balcony ? 'Có ban công' : 'Không có ban công');
+            }
+            
+            const detailsText = details.length > 0 ? `<br><small style="color: #6b7b8c; font-size: 12px;">${details.join(' • ')}</small>` : '';
+            
             return `
                 <li>
-                    <span>${escapeHtml(roomNumber)}</span>
+                    <span>${escapeHtml(roomNumber)}${detailsText}</span>
                     <small>${escapeHtml(type)}</small>
                 </li>
             `;

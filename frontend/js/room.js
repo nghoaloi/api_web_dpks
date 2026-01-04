@@ -164,6 +164,8 @@
             availabilityEl.innerHTML = `<div class="availability-simple">Còn <strong>${availableCount}</strong> phòng trống</div>`;
         }
         
+        // Room details (lầu, hướng, diện tích, ban công)
+        renderRoomDetails(roomType);
 
         const warningEl = document.getElementById('booking-warning');
         if (warningEl && availableCount > 0 && availableCount <= 3) {
@@ -308,6 +310,74 @@
             diffDays=1;
         }
         return diffDays || 0;
+    }
+
+    function renderRoomDetails(roomType) {
+        const detailsSection = document.getElementById('room-details');
+        if (!detailsSection) return;
+
+        const floor = roomType.sample_floor;
+        const direction = roomType.sample_direction;
+        const area = roomType.sample_area;
+        const hasBalcony = roomType.sample_has_balcony;
+
+        // Kiểm tra xem có thông tin nào không
+        const hasDetails = floor || direction || area || hasBalcony !== undefined;
+
+        if (!hasDetails) {
+            detailsSection.style.display = 'none';
+            return;
+        }
+
+        detailsSection.style.display = 'block';
+
+        // Hiển thị lầu/tầng
+        const floorEl = document.getElementById('detail-floor');
+        const floorValueEl = document.getElementById('detail-floor-value');
+        if (floorEl && floorValueEl) {
+            if (floor) {
+                floorValueEl.textContent = floor;
+                floorEl.style.display = 'flex';
+            } else {
+                floorEl.style.display = 'none';
+            }
+        }
+
+        // Hiển thị hướng
+        const directionEl = document.getElementById('detail-direction');
+        const directionValueEl = document.getElementById('detail-direction-value');
+        if (directionEl && directionValueEl) {
+            if (direction) {
+                directionValueEl.textContent = direction;
+                directionEl.style.display = 'flex';
+            } else {
+                directionEl.style.display = 'none';
+            }
+        }
+
+        // Hiển thị diện tích
+        const areaEl = document.getElementById('detail-area');
+        const areaValueEl = document.getElementById('detail-area-value');
+        if (areaEl && areaValueEl) {
+            if (area) {
+                areaValueEl.textContent = `${Number(area).toLocaleString('vi-VN')} m²`;
+                areaEl.style.display = 'flex';
+            } else {
+                areaEl.style.display = 'none';
+            }
+        }
+
+        // Hiển thị ban công
+        const balconyEl = document.getElementById('detail-balcony');
+        const balconyValueEl = document.getElementById('detail-balcony-value');
+        if (balconyEl && balconyValueEl) {
+            if (hasBalcony !== undefined && hasBalcony !== null) {
+                balconyValueEl.textContent = hasBalcony ? 'Có ban công' : 'Không có ban công';
+                balconyEl.style.display = 'flex';
+            } else {
+                balconyEl.style.display = 'none';
+            }
+        }
     }
 
     function renderAmenities(roomType) {

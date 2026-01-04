@@ -22,6 +22,10 @@ class RoomController extends Controller
             'type_id'   => 'required|integer|exists:room_types,id',
             'room_number'  => 'required|string|max:255',
             'status'       => 'required|string|in:Còn phòng,Đã có người,Bảo trì',
+            'floor'        => 'nullable|string|max:50',
+            'direction'    => 'nullable|string|max:100',
+            'area'         => 'nullable|numeric|min:0',
+            'has_balcony'  => 'nullable|boolean',
         ]);
 
         $room = Room::create($validated);
@@ -58,6 +62,10 @@ class RoomController extends Controller
             'type_id'      => 'sometimes|integer|exists:room_types,id',
             'room_number'  => 'sometimes|string|max:255',
             'status'       => 'sometimes|string|in:Còn phòng,Đã có người,Bảo trì',
+            'floor'        => 'nullable|string|max:50',
+            'direction'    => 'nullable|string|max:100',
+            'area'         => 'nullable|numeric|min:0',
+            'has_balcony'  => 'nullable|boolean',
         ]);
 
         $room->update($validated);

@@ -113,31 +113,70 @@ class ReviewController extends Controller
         $rewardMessage = null;
 
         try {
+            
             if (!$wasExistingReview) {
+
                 $alreadyHasReviewReward = UserVoucher::where('user_id', $user->id)
                     ->where('source', 'reward_review')
                     ->exists();
 
                 if (!$alreadyHasReviewReward) {
                     $rewardVoucher = Voucher::where('code', 'REVIEW50K')->first();
+                    
                     if ($rewardVoucher) {
-                        UserVoucher::create([
+                        $now = now();
+                        $isVoucherValid = $rewardVoucher->status === 'active' 
+                            && (!$rewardVoucher->start_date || $rewardVoucher->start_date <= $now)
+                            && (!$rewardVoucher->end_date || $rewardVoucher->end_date >= $now);
+                        
+                        if ($isVoucherValid) {
+                            UserVoucher::create([
+                                'user_id' => $user->id,
+                                'voucher_id' => $rewardVoucher->id,
+                                'is_used' => false,
+                                'expired_at' => $rewardVoucher->end_date,
+                                'source' => 'reward_review',
+                            ]);
+                            $rewarded = true;
+                            $rewardMessage = 'Cảm ơn bạn đã đánh giá! Bạn vừa nhận được một mã giảm giá trong tài khoản.';
+                            
+                            Log::info('Review reward voucher granted', [
+                                'user_id' => $user->id,
+                                'room_type_id' => $roomTypeId,
+                                'voucher_id' => $rewardVoucher->id,
+                            ]);
+                        } else {
+                            Log::warning('Review reward voucher exists but is not valid', [
+                                'user_id' => $user->id,
+                                'voucher_id' => $rewardVoucher->id,
+                                'status' => $rewardVoucher->status,
+                                'start_date' => $rewardVoucher->start_date,
+                                'end_date' => $rewardVoucher->end_date,
+                            ]);
+                        }
+                    } else {
+                        Log::warning('Review reward voucher REVIEW50K not found', [
                             'user_id' => $user->id,
-                            'voucher_id' => $rewardVoucher->id,
-                            'code' => null, 
-                            'is_used' => false,
-                            'expired_at' => $rewardVoucher->end_date,
-                            'source' => 'reward_review',
+                            'room_type_id' => $roomTypeId,
                         ]);
-                        $rewarded = true;
-                        $rewardMessage = 'Cảm ơn bạn đã đánh giá! Bạn vừa nhận được một mã giảm giá trong tài khoản.';
                     }
+                } else {
+                    Log::info('User already has review reward voucher', [
+                        'user_id' => $user->id,
+                        'room_type_id' => $roomTypeId,
+                    ]);
                 }
+            } else {
+                Log::info('Review is update, not new review - no reward', [
+                    'user_id' => $user->id,
+                    'room_type_id' => $roomTypeId,
+                ]);
             }
         } catch (\Exception $e) {
             Log::error('Reward review voucher failed: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'room_type_id' => $roomTypeId,
+                'trace' => $e->getTraceAsString(),
             ]);
         }
 

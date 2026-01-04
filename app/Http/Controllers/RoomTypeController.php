@@ -91,12 +91,35 @@ class RoomTypeController extends Controller
             $reviewCount = $reviews->count();
             $avgRating = $reviewCount > 0 ? $reviews->avg('rating') : 0;
 
+            // Lấy thông tin mẫu từ một phòng đại diện (ưu tiên phòng có thông tin chi tiết)
+            $sampleRoom = Room::where('type_id', $id)
+                ->where(function($query) {
+                    $query->whereNotNull('floor')
+                          ->orWhereNotNull('direction')
+                          ->orWhereNotNull('area')
+                          ->orWhereNotNull('has_balcony');
+                })
+                ->first();
+            
+            // Nếu không có phòng có thông tin chi tiết, lấy phòng đầu tiên
+            if (!$sampleRoom) {
+                $sampleRoom = Room::where('type_id', $id)->first();
+            }
+
             // Thêm thông tin vào response
             $roomTypeData = $roomType->toArray();
             $roomTypeData['available_rooms_count'] = $availableRoomsCount;
             $roomTypeData['total_rooms_count'] = $totalRoomsCount;
             $roomTypeData['rating'] = round($avgRating, 1);
             $roomTypeData['review_count'] = $reviewCount;
+            
+            // Thêm thông tin chi tiết từ phòng mẫu
+            if ($sampleRoom) {
+                $roomTypeData['sample_floor'] = $sampleRoom->floor;
+                $roomTypeData['sample_direction'] = $sampleRoom->direction;
+                $roomTypeData['sample_area'] = $sampleRoom->area;
+                $roomTypeData['sample_has_balcony'] = $sampleRoom->has_balcony;
+            }
 
             return response()->json([
                 'success' => true,
