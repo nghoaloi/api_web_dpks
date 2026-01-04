@@ -1,0 +1,151 @@
+.vouchers-page {
+    padding-top: 90px;
+    padding-bottom: 40px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.vouchers-header {
+    margin-bottom: 24px;
+}
+
+.vouchers-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.vouchers-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.vouchers-loading,
+.vouchers-empty {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #64748b;
+}
+
+.vouchers-empty i {
+    font-size: 32px;
+    color: #94a3b8;
+}
+
+.vouchers-list {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.voucher-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px dashed #e2e8f0;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.voucher-card::before,
+.voucher-card::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transform: translateY(-50%);
+}
+
+.voucher-card::before {
+    left: -9px;
+}
+
+.voucher-card::after {
+    right: -9px;
+}
+
+.voucher-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.voucher-code {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #0f172a;
+    text-transform: uppercase;
+}
+
+.voucher-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.voucher-badge.active {
+    background: #ecfdf3;
+    color: #15803d;
+}
+
+.voucher-badge.used {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.voucher-badge.expired {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.voucher-desc {
+    font-size: 14px;
+    color: #475569;
+}
+
+.voucher-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.voucher-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.voucher-meta i {
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .vouchers-page {
+        padding-top: 80px;
+    }
+
+    .vouchers-header h1 {
+        font-size: 22px;
+    }
+}
+
+
+
+

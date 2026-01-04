@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Booking;
 use App\Models\BookingService;
+use App\Models\UserVoucher;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,7 +79,12 @@ class PaymentController extends Controller
                 $totalServicesPrice = BookingService::whereIn('booking_id', $relatedBookings)
                     ->sum(DB::raw('price * quantity'));
                 
-                $totalPrice = $totalRoomPrice + $totalServicesPrice;
+                // Tính tổng voucher discount từ các booking
+                $totalVoucherDiscount = Booking::whereIn('id', $relatedBookings)
+                    ->sum('voucher_discount');
+                
+                // Tổng giá sau khi trừ voucher discount
+                $totalPrice = ($totalRoomPrice + $totalServicesPrice) - $totalVoucherDiscount;
                 
                 $paymentAmount = $totalPrice;
                 if ($roomType->payment_type === 'trả trước một phần') {
@@ -156,7 +163,23 @@ class PaymentController extends Controller
                         return $bookingService->price * $bookingService->quantity;
                     });
 
-                    $totalPrice = $roomTotalPrice + $servicesTotalPrice;
+                    // Tính tổng voucher discount từ các booking
+                    $totalVoucherDiscount = Booking::whereIn('id', $relatedBookings)
+                        ->sum('voucher_discount');
+                    
+                    // Tổng giá sau khi trừ voucher discount
+                    $totalPrice = ($roomTotalPrice + $servicesTotalPrice) - $totalVoucherDiscount;
+                    // Lấy voucher_code từ booking đầu tiên có voucher
+                    $voucherCode = null;
+                    $voucherDiscount = 0;
+                    foreach ($relatedBookings as $bid) {
+                        $b = Booking::find($bid);
+                        if ($b && $b->voucher_code) {
+                            $voucherCode = $b->voucher_code;
+                            $voucherDiscount = $b->voucher_discount ?? 0;
+                            break;
+                        }
+                    }
                     $paymentType = $roomType->payment_type ?? 'Không cần thanh toán trước';
 
                     $remainingAmount = null;
@@ -179,7 +202,7 @@ class PaymentController extends Controller
                         'check_out' => $checkOutFormatted,
                         'room_total_price' => $roomTotalPrice,
                         'services_total_price' => $servicesTotalPrice,
-                        'total_price' => $totalPrice,
+                        'total_price' => $totalPrice - $voucherDiscount,
                         'services' => $servicesList,
                         'payment_type' => $paymentType,
                         'payment_amount' => $payment->total_amount,
@@ -192,6 +215,99 @@ class PaymentController extends Controller
                     $recipientEmail = $booking->user->email ?? $user->email;
                     if ($recipientEmail) {
                         Mail::to($recipientEmail)->send(new BookingConfirmationMail($mailData));
+                    }
+
+                    // Đánh dấu voucher đã sử dụng và tăng used_count
+                    if (!empty($voucherCode)) {
+                        try {
+                            // Lấy voucher_id từ booking đầu tiên có voucher
+                            $voucherId = null;
+                            foreach ($relatedBookings as $bid) {
+                                $b = Booking::find($bid);
+                                if ($b && $b->voucher_id) {
+                                    $voucherId = $b->voucher_id;
+                                    break;
+                                }
+                            }
+
+                            // Tìm voucher theo code hoặc voucher_id
+                            $voucher = null;
+                            if ($voucherId) {
+                                $voucher = Voucher::find($voucherId);
+                            }
+                            if (!$voucher && $voucherCode) {
+                                $voucher = Voucher::whereRaw('LOWER(code) = ?', [strtolower($voucherCode)])->first();
+                            }
+
+                            if ($voucher) {
+                                // Tăng used_count trong bảng vouchers
+                                $voucher->increment('used_count');
+                                // Reload lại voucher để lấy giá trị used_count mới
+                                $voucher->refresh();
+                                Log::info('Voucher used_count incremented', [
+                                    'voucher_id' => $voucher->id,
+                                    'voucher_code' => $voucher->code,
+                                    'new_used_count' => $voucher->used_count,
+                                ]);
+                            } else {
+                                Log::warning('Voucher not found when trying to increment used_count', [
+                                    'voucher_code' => $voucherCode,
+                                    'voucher_id' => $voucherId,
+                                ]);
+                            }
+
+                            // Đánh dấu user_voucher đã sử dụng - tìm theo voucher_id (chính xác hơn)
+                            $updatedCount = 0;
+                            if ($voucherId) {
+                                // Tìm theo voucher_id (chính xác nhất) - ưu tiên cách này
+                                $updatedCount = UserVoucher::where('user_id', $user->id)
+                                    ->where('voucher_id', $voucherId)
+                                    ->where('is_used', false)
+                                    ->update([
+                                        'is_used' => true,
+                                        'used_at' => Carbon::now(),
+                                    ]);
+                                
+                                Log::info('Tried to mark voucher as used by voucher_id', [
+                                    'user_id' => $user->id,
+                                    'voucher_id' => $voucherId,
+                                    'updated_count' => $updatedCount,
+                                ]);
+                            }
+                            
+                            // Nếu không tìm thấy theo voucher_id, thử tìm theo code (từ vouchers.code)
+                            if ($updatedCount === 0 && $voucherCode) {
+                                $updatedCount = UserVoucher::where('user_id', $user->id)
+                                    ->whereHas('voucher', function ($q) use ($voucherCode) {
+                                        $q->whereRaw('LOWER(code) = ?', [strtolower($voucherCode)]);
+                                    })
+                                    ->where('is_used', false)
+                                    ->update([
+                                        'is_used' => true,
+                                        'used_at' => Carbon::now(),
+                                    ]);
+                                
+                                Log::info('Tried to mark voucher as used by code', [
+                                    'user_id' => $user->id,
+                                    'voucher_code' => $voucherCode,
+                                    'updated_count' => $updatedCount,
+                                ]);
+                            }
+                            
+                            Log::info('Voucher marked as used', [
+                                'user_id' => $user->id,
+                                'voucher_code' => $voucherCode,
+                                'voucher_id' => $voucherId,
+                                'updated_count' => $updatedCount,
+                            ]);
+                        } catch (\Exception $voucherEx) {
+                            Log::error('Mark voucher used failed: ' . $voucherEx->getMessage(), [
+                                'user_id' => $user->id,
+                                'booking_id' => $booking->id,
+                                'voucher_code' => $voucherCode,
+                                'trace' => $voucherEx->getTraceAsString(),
+                            ]);
+                        }
                     }
                 } catch (\Exception $mailException) {
                     Log::error('Payment confirmation email failed: ' . $mailException->getMessage(), [

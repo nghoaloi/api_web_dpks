@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Review;
 use App\Models\RoomType;
+use App\Models\UserVoucher;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReviewController extends Controller
 {
@@ -92,6 +95,10 @@ class ReviewController extends Controller
             ], 403);
         }
 
+        $wasExistingReview = Review::where('user_id', $user->id)
+            ->where('type_id', $roomTypeId)
+            ->exists();
+
         $review = Review::updateOrCreate(
             ['user_id' => $user->id, 'type_id' => $roomTypeId],
             [
@@ -102,10 +109,44 @@ class ReviewController extends Controller
 
         $review->load(['user:id,fullname,avatar']);
 
+        $rewarded = false;
+        $rewardMessage = null;
+
+        try {
+            if (!$wasExistingReview) {
+                $alreadyHasReviewReward = UserVoucher::where('user_id', $user->id)
+                    ->where('source', 'reward_review')
+                    ->exists();
+
+                if (!$alreadyHasReviewReward) {
+                    $rewardVoucher = Voucher::where('code', 'REVIEW50K')->first();
+                    if ($rewardVoucher) {
+                        UserVoucher::create([
+                            'user_id' => $user->id,
+                            'voucher_id' => $rewardVoucher->id,
+                            'code' => null, 
+                            'is_used' => false,
+                            'expired_at' => $rewardVoucher->end_date,
+                            'source' => 'reward_review',
+                        ]);
+                        $rewarded = true;
+                        $rewardMessage = 'Cảm ơn bạn đã đánh giá! Bạn vừa nhận được một mã giảm giá trong tài khoản.';
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Reward review voucher failed: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'room_type_id' => $roomTypeId,
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Đánh giá đã được lưu',
             'data' => $review,
+            'rewarded' => $rewarded,
+            'reward_message' => $rewardMessage,
         ], 200);
     }
 

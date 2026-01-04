@@ -557,6 +557,10 @@
                 throw new Error(json.message || 'Không thể lưu đánh giá');
             }
 
+            if (json.rewarded && json.reward_message) {
+                showVoucherModal(json.reward_message);
+            }
+
             await loadReviews(reviewRoomTypeId);
         } catch (error) {
             alert(error.message || 'Không thể lưu đánh giá');
@@ -719,6 +723,56 @@
     function escapeHtml(str){
         return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
     }
+
+    function showVoucherModal(message) {
+        const modal = document.getElementById('voucher-modal');
+        const messageEl = document.getElementById('voucher-modal-message');
+        const closeBtn = document.getElementById('voucher-modal-close');
+        const overlay = modal?.querySelector('.voucher-modal-overlay');
+
+        if (!modal || !messageEl || !closeBtn) return;
+
+        messageEl.textContent = message;
+        modal.style.display = 'flex';
+
+        let autoCloseTimer = null;
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            // Xóa event listeners và timer
+            if (closeBtn) {
+                closeBtn.removeEventListener('click', closeModal);
+            }
+            if (overlay) {
+                overlay.removeEventListener('click', closeModal);
+            }
+            if (handleEsc) {
+                document.removeEventListener('keydown', handleEsc);
+            }
+            if (autoCloseTimer) {
+                clearTimeout(autoCloseTimer);
+            }
+        };
+
+        // Đóng modal khi nhấn ESC
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        overlay?.addEventListener('click', closeModal);
+        document.addEventListener('keydown', handleEsc);
+
+        // Tự động đóng sau 2 giây
+        autoCloseTimer = setTimeout(() => {
+            closeModal();
+        }, 2000);
+    }
 })();
 
 
+
+
+   

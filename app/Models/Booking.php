@@ -14,13 +14,26 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'room_id',
-        'arrival_time',
-        'special_requests',
         'check_in',
         'check_out',
+        'arrival_time',
+        'special_requests',
         'total_price',
+        'voucher_code',
+        'voucher_discount',
+        'voucher_id',
         'status',
     ];
+
+    protected $casts = [
+        'total_price' => 'float',
+        'voucher_discount' => 'float',
+    ];
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class, 'voucher_id');
+    }
 
     public function user()
     {
@@ -47,3 +60,5 @@ class Booking extends Model
         return $this->hasMany(Payment::class, 'booking_id');
     }
 }
+
+    

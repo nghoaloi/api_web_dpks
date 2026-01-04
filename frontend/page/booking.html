@@ -224,6 +224,21 @@
                         
                         <p class="rules-agree">Khi tiếp tục các bước tiếp theo, bạn đồng ý với các quy tắc chung này.</p>
 
+                        <div class="voucher-box">
+                            <h3>Mã giảm giá</h3>
+                            <div class="voucher-row">
+                                <input type="text" id="voucher-code-input" placeholder="Nhập mã giảm giá nếu có">
+                                <button type="button" class="btn-secondary" id="btn-apply-voucher">
+                                    Áp dụng
+                                </button>
+                            </div>
+                            <p id="voucher-message" class="voucher-message"></p>
+                            <div id="voucher-summary" class="voucher-summary" style="display: none;">
+                                <span class="label">Giảm giá:</span>
+                                <span class="value" id="voucher-discount-display">0 đ</span>
+                            </div>
+                        </div>
+
                         <div class="terms-checkbox">
                             <label>
                                 <input type="checkbox" id="agree-terms" required>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher của tôi - Hotel Booking</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/vouchers.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="vouchers-page">
+        <div class="container">
+            <section class="vouchers-header">
+                <h1>Voucher của tôi</h1>
+                <p>Theo dõi các mã giảm giá bạn nhận được khi đặt phòng và đánh giá.</p>
+            </section>
+
+            <section id="vouchers-loading" class="vouchers-loading">
+                <i class="fa fa-spinner fa-spin"></i>
+                <span>Đang tải voucher...</span>
+            </section>
+
+            <section id="vouchers-empty" class="vouchers-empty" style="display:none;">
+                <i class="fa fa-ticket-alt"></i>
+                <p>Hiện bạn chưa có voucher nào. Hãy đặt phòng và đánh giá để nhận ưu đãi.</p>
+            </section>
+
+            <section id="vouchers-list" class="vouchers-list" style="display:none;"></section>
+        </div>
+    </main>
+
+    <script src="../js/header-loader.js"></script>
+    <script src="../js/vouchers.js"></script>
+</body>
+</html>
+
+
+
+
+

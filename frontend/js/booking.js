@@ -13,7 +13,14 @@
         userProfile: null
     };
     let servicesList = [];
-    let selectedServices = {}; 
+    let selectedServices = {};
+    let voucherState = {
+        code: null,
+        voucherId: null,
+        discount: 0,
+        finalAmount: 0,
+        description: null,
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('auth_token');
@@ -46,6 +53,7 @@
         ]);
         renderStep1();
         loadUserDataToForm();
+        bindVoucherEvents();
     }
 
     async function loadRoomType() {
@@ -176,9 +184,26 @@
         }
         
         const totalPrice = roomTotalPrice + servicesTotalPrice;
+
+        const voucherSummaryEl = document.getElementById('voucher-summary');
+        const voucherDiscountEl = document.getElementById('voucher-discount-display');
+        const confirmTotalPriceEl = document.getElementById('confirm-total-price');
+
+        let finalTotal = totalPrice;
+        if (voucherState.discount > 0 && voucherState.discount < totalPrice) {
+            finalTotal = totalPrice - voucherState.discount;
+            if (voucherSummaryEl && voucherDiscountEl) {
+                voucherSummaryEl.style.display = 'flex';
+                voucherDiscountEl.textContent = `- ${Number(voucherState.discount).toLocaleString('vi-VN')} đ`;
+            }
+        } else if (voucherSummaryEl) {
+            voucherSummaryEl.style.display = 'none';
+        }
         
-        document.getElementById('confirm-total-price').textContent = 
-            totalPrice > 0 ? Number(totalPrice).toLocaleString('vi-VN') + ' đ' : '—';
+        if (confirmTotalPriceEl) {
+            confirmTotalPriceEl.textContent = 
+                finalTotal > 0 ? Number(finalTotal).toLocaleString('vi-VN') + ' đ' : '—';
+        }
 
         renderBookingDetails();
     }
@@ -209,6 +234,9 @@
         }
         
         const totalPrice = roomTotalPrice + servicesTotalPrice;
+        const totalAfterVoucher = voucherState.discount > 0 && voucherState.discount < totalPrice
+            ? totalPrice - voucherState.discount
+            : totalPrice;
 
         detailsList.innerHTML = `
             <div class="detail-item">
@@ -238,7 +266,7 @@
             ${servicesHtml}
             <div class="detail-item" style="border-top: 2px solid #eef1f4; padding-top: 12px; margin-top: 8px;">
                 <span class="detail-label" style="font-weight: 700;">Tổng giá:</span>
-                <span class="detail-value" style="font-size: 18px; color: #0d47a1;">${totalPrice > 0 ? Number(totalPrice).toLocaleString('vi-VN') + ' đ' : '—'}</span>
+                <span class="detail-value" style="font-size: 18px; color: #0d47a1;">${totalAfterVoucher > 0 ? Number(totalAfterVoucher).toLocaleString('vi-VN') + ' đ' : '—'}</span>
             </div>
         `;
     }
@@ -308,7 +336,7 @@
                     </div>
                     <div class="service-controls">
                         <div class="quantity-control" style="display: ${isSelected ? 'flex' : 'none'}">
-                            <button class="quantity-btn" onclick="decreaseServiceQuantity(${service.id})" ${quantity <= 1 ? 'disabled' : ''}>-</button>
+                            <button class="quantity-btn" onclick="decreaseServiceQuantity(${service.id})" ${quantity <= 0 ? 'disabled' : ''}>-</button>
                             <span class="quantity-value">${quantity}</span>
                             <button class="quantity-btn" onclick="increaseServiceQuantity(${service.id})">+</button>
                         </div>
@@ -338,24 +366,29 @@
         }
 
         renderServices();
+        renderStep1(); // Cập nhật tổng giá khi chọn/bỏ dịch vụ
     }
 
     function increaseServiceQuantity(serviceId) {
         if (selectedServices[serviceId]) {
             selectedServices[serviceId].quantity++;
             renderServices();
+            renderStep1(); // Cập nhật tổng giá khi tăng số lượng dịch vụ
         }
     }
 
     function decreaseServiceQuantity(serviceId) {
-        if (selectedServices[serviceId] && selectedServices[serviceId].quantity >= 0) {
-            selectedServices[serviceId].quantity--;
-            renderServices();
-        } else if (selectedServices[serviceId] && selectedServices[serviceId].quantity === 1) {
+        if (!selectedServices[serviceId]) return;
+        
+        selectedServices[serviceId].quantity--;
+        
+        // Nếu số lượng <= 0, xóa dịch vụ khỏi danh sách đã chọn
+        if (selectedServices[serviceId].quantity <= 0) {
             delete selectedServices[serviceId];
-            renderServices();
         }
+        
         renderServices();
+        renderStep1(); // Cập nhật tổng giá khi giảm số lượng hoặc xóa dịch vụ
     }
 
     function updateServicesSummary() {
@@ -533,7 +566,18 @@
 
         const pricePerNight = roomType.base_price || 0;
         const nights = calculateNights(bookingData.checkIn, bookingData.checkOut);
-        const totalPrice = pricePerNight * bookingData.quantity * nights;
+        const baseTotal = pricePerNight * bookingData.quantity * nights;
+
+        let servicesTotal = 0;
+        for (const serviceId in selectedServices) {
+            const item = selectedServices[serviceId];
+            servicesTotal += item.service.price * item.quantity;
+        }
+
+        const totalPrice = baseTotal + servicesTotal;
+        const totalAfterVoucher = voucherState.discount > 0 && voucherState.discount < totalPrice
+            ? totalPrice - voucherState.discount
+            : totalPrice;
 
         summaryEl.innerHTML = `
             <div class="summary-final-item">
@@ -562,9 +606,102 @@
             </div>
             <div class="summary-final-item">
                 <span style="font-weight: 700; font-size: 18px;">Tổng giá:</span>
-                <span style="font-weight: 700; font-size: 20px; color: #0d47a1;">${totalPrice > 0 ? Number(totalPrice).toLocaleString('vi-VN') + ' đ' : '—'}</span>
+                <span style="font-weight: 700; font-size: 20px; color: #0d47a1;">${totalAfterVoucher > 0 ? Number(totalAfterVoucher).toLocaleString('vi-VN') + ' đ' : '—'}</span>
             </div>
         `;
+    }
+
+    function bindVoucherEvents() {
+        const applyBtn = document.getElementById('btn-apply-voucher');
+        if (!applyBtn) return;
+
+        applyBtn.addEventListener('click', applyVoucher);
+    }
+
+    async function applyVoucher() {
+        const input = document.getElementById('voucher-code-input');
+        const messageEl = document.getElementById('voucher-message');
+        const roomType = bookingData.roomType;
+
+        if (!input || !roomType) return;
+
+        const code = input.value.trim();
+        if (!code) {
+            if (messageEl) {
+                messageEl.textContent = 'Vui lòng nhập mã giảm giá.';
+                messageEl.style.color = '#e11d48';
+            }
+            return;
+        }
+
+        const pricePerNight = roomType.base_price || 0;
+        const nights = calculateNights(bookingData.checkIn, bookingData.checkOut);
+        let roomTotalPrice = pricePerNight * bookingData.quantity * nights;
+
+        let servicesTotalPrice = 0;
+        for (const serviceId in selectedServices) {
+            const item = selectedServices[serviceId];
+            servicesTotalPrice += item.service.price * item.quantity;
+        }
+
+        const totalPrice = roomTotalPrice + servicesTotalPrice;
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await fetch(API_BASE + 'vouchers/apply', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    total_amount: totalPrice
+                })
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.success) {
+                voucherState.code = json.data.code;
+                voucherState.voucherId = json.data.voucher_id;
+                voucherState.discount = json.data.discount || 0;
+                voucherState.finalAmount = json.data.final_amount || totalPrice;
+                voucherState.description = json.data.description || null;
+
+                if (messageEl) {
+                    messageEl.textContent = 'Áp dụng mã giảm giá thành công.';
+                    messageEl.style.color = '#16a34a';
+                }
+
+                renderStep1();
+                renderBookingDetails();
+                renderFinalSummary();
+            } else {
+                const msg = json.message || 'Mã giảm giá không hợp lệ.';
+                if (messageEl) {
+                    messageEl.textContent = msg;
+                    messageEl.style.color = '#e11d48';
+                }
+                voucherState = {
+                    code: null,
+                    voucherId: null,
+                    discount: 0,
+                    finalAmount: 0,
+                    description: null,
+                };
+                renderStep1();
+                renderBookingDetails();
+                renderFinalSummary();
+            }
+        } catch (e) {
+            console.error('Apply voucher failed', e);
+            if (messageEl) {
+                messageEl.textContent = 'Có lỗi khi áp dụng mã giảm giá. Vui lòng thử lại.';
+                messageEl.style.color = '#e11d48';
+            }
+        }
     }
 
     async function completeBooking() {
@@ -652,7 +789,10 @@
                 email: email,
                 phone: phone,
                 address: address,
-                services: servicesArray.length > 0 ? servicesArray : null
+                services: servicesArray.length > 0 ? servicesArray : null,
+                voucher_code: voucherState.code,
+                voucher_id: voucherState.voucherId,
+                voucher_discount: voucherState.discount
             };
 
             const res = await fetch(API_BASE + 'bookings', {

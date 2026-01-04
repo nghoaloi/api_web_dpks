@@ -42,9 +42,15 @@ class User extends Authenticatable
         ];
     }
     public function bookings()
-{
-    //1 user có nhiều lần đặt phòng
-    return $this->hasMany(Booking::class, 'user_id', 'id');
-}
+    {
+        //1 user có nhiều lần đặt phòng
+        return $this->hasMany(Booking::class, 'user_id', 'id');
+    }
+
+    public function vouchers()
+    {
+        return $this->hasMany(UserVoucher::class, 'user_id', 'id');
+    }
 
 }
+

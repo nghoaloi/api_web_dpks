@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TienichContronller;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\VoucherController;
 
 
     Route::prefix('auth')->group(function(){
@@ -54,8 +55,12 @@ Route::middleware('auth:sanctum')->group(function(){
         Route::post('/payments/update', [PaymentController::class, 'update']);
         Route::post('/room-types/{id}/reviews', [ReviewController::class, 'store']);
         Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+        Route::get('/my-vouchers', [VoucherController::class, 'myVouchers']);
+        Route::post('/vouchers/apply', [VoucherController::class, 'apply']);
     });
     
     
     Route::get('/vnpay/return', [VNPayController::class, 'return']);
 ?>
+
+    

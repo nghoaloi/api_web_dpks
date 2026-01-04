@@ -152,6 +152,9 @@ class BookingController extends Controller
                 'services' => 'nullable|array', 
                 'services.*.service_id' => 'required_with:services|integer|exists:services,id',
                 'services.*.quantity' => 'required_with:services|integer|min:1|max:100',
+                'voucher_code' => 'nullable|string|max:50',
+                'voucher_id' => 'nullable|integer',
+                'voucher_discount' => 'nullable|numeric|min:0',
             ]);
             
             if (!empty($validated['arrival_time'])) {
@@ -204,6 +207,20 @@ class BookingController extends Controller
             
             $totalPrice = $roomTotalPrice + $servicesTotalPrice;
 
+            $voucherCode = $validated['voucher_code'] ?? null;
+            $voucherId = $validated['voucher_id'] ?? null;
+            $voucherDiscount = isset($validated['voucher_discount']) ? (float) $validated['voucher_discount'] : 0;
+
+            if ($voucherDiscount > 0 && $voucherDiscount < $totalPrice) {
+                $totalPriceAfterDiscount = $totalPrice - $voucherDiscount;
+            } elseif ($voucherDiscount >= $totalPrice) {
+                $voucherDiscount = $totalPrice;
+                $totalPriceAfterDiscount = 0;
+            } else {
+                $voucherDiscount = 0;
+                $totalPriceAfterDiscount = $totalPrice;
+            }
+
             DB::beginTransaction();
             
             try {
@@ -225,19 +242,37 @@ class BookingController extends Controller
 
                 $bookings = [];
                 $pricePerRoom = $roomTotalPrice / $quantity;
+                $discountPerRoom = $quantity > 0 ? ($voucherDiscount / $quantity) : 0;
+                // Giá phòng sau khi trừ discount
+                $pricePerRoomAfterDiscount = $pricePerRoom - $discountPerRoom;
                 $paymentAmount = null; 
                 $needPayment = false; 
                 
                 $paymentTypeNormalized = trim($paymentType);
                 
+                // Tính tổng giá sau khi trừ voucher discount
+                $finalTotalPrice = $totalPriceAfterDiscount;
+                
                 if ($paymentTypeNormalized === 'Thanh toán trước') {
-                    $paymentAmount = $totalPrice; 
+                    $paymentAmount = $finalTotalPrice; 
                     $needPayment = true;
-                    Log::info('Payment required: Full payment', ['payment_type' => $paymentType, 'payment_amount' => $paymentAmount]);
+                    Log::info('Payment required: Full payment', [
+                        'payment_type' => $paymentType, 
+                        'payment_amount' => $paymentAmount,
+                        'total_price' => $totalPrice,
+                        'voucher_discount' => $voucherDiscount,
+                        'final_total' => $finalTotalPrice
+                    ]);
                 } elseif ($paymentTypeNormalized === 'Trả trước một phần') {
-                    $paymentAmount = $totalPrice * 0.3; 
+                    $paymentAmount = $finalTotalPrice * 0.3; 
                     $needPayment = true;
-                    Log::info('Payment required: Partial payment (30%)', ['payment_type' => $paymentType, 'payment_amount' => $paymentAmount]);
+                    Log::info('Payment required: Partial payment (30%)', [
+                        'payment_type' => $paymentType, 
+                        'payment_amount' => $paymentAmount,
+                        'total_price' => $totalPrice,
+                        'voucher_discount' => $voucherDiscount,
+                        'final_total' => $finalTotalPrice
+                    ]);
                 } else {
                     $needPayment = false;
                     $paymentAmount = null;
@@ -259,7 +294,10 @@ class BookingController extends Controller
                         'check_out' => $checkOutDateTime->format('Y-m-d H:i:s'),
                         'arrival_time' => $arrivalTime,
                         'special_requests' => $specialRequests,
-                        'total_price' => $pricePerRoom, 
+                        'total_price' => max(0, $pricePerRoomAfterDiscount), // Lưu giá sau khi trừ discount
+                        'voucher_code' => $voucherCode,
+                        'voucher_discount' => $discountPerRoom,
+                        'voucher_id' => $voucherId,
                         'status' => 'Chờ xử lý',
                     ]);
 
@@ -317,9 +355,9 @@ class BookingController extends Controller
                 $roomNumbers = isset($availableRooms) ? $availableRooms->pluck('room_number')->filter()->values()->all() : [];
                 $remainingAmountEmail = null;
                 if (($paymentTypeNormalized ?? '') === 'Trả trước một phần' && $paymentAmount !== null) {
-                    $remainingAmountEmail = $totalPrice - $paymentAmount;
+                    $remainingAmountEmail = $totalPriceAfterDiscount - $paymentAmount;
                 } elseif (!$needPayment) {
-                    $remainingAmountEmail = $totalPrice;
+                    $remainingAmountEmail = $totalPriceAfterDiscount;
                 }
 
                 $bookingMailData = [
@@ -332,7 +370,8 @@ class BookingController extends Controller
                     'check_out' => $checkOut->format('d/m/Y'),
                     'room_total_price' => $roomTotalPrice,
                     'services_total_price' => $servicesTotalPrice,
-                    'total_price' => $totalPrice,
+                    'total_price' => $totalPriceAfterDiscount, // Sử dụng giá sau khi trừ discount
+                    'voucher_discount' => $voucherDiscount > 0 ? $voucherDiscount : null,
                     'services' => $selectedServices,
                     'payment_type' => $paymentType,
                     'payment_amount' => $paymentAmount,
@@ -359,13 +398,14 @@ class BookingController extends Controller
                 'booking_code' => $bookingCode,
                 'room_total_price' => $roomTotalPrice,
                 'services_total_price' => $servicesTotalPrice,
-                'total_price' => $totalPrice,
+                'total_price' => $totalPriceAfterDiscount,
+                'voucher_discount' => $voucherDiscount,
                 'services' => $selectedServices,
                 'payment_type' => $paymentType,
                 'payment_amount' => $paymentAmount,
                 'need_payment' => $needPayment,
                 'remaining_amount' => $needPayment && ($paymentTypeNormalized ?? '') === 'Trả trước một phần'
-                    ? ($totalPrice - $paymentAmount) 
+                    ? ($totalPriceAfterDiscount - $paymentAmount) 
                     : null,
             ], 201);
 
@@ -393,3 +433,5 @@ class BookingController extends Controller
         }
     }
 }
+
+        

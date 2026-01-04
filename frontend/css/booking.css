@@ -413,6 +413,83 @@
     margin-bottom: 24px;
 }
 
+.voucher-box {
+    margin: 20px 0 28px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f9fafb 0%, #edf2ff 100%);
+}
+
+.voucher-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.voucher-box h3::before {
+    content: "\f3ff";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #0d47a1;
+}
+
+.voucher-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.voucher-row input[type="text"] {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.voucher-row input[type="text"]:focus {
+    outline: none;
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.15);
+}
+
+.voucher-row #btn-apply-voucher {
+    white-space: nowrap;
+    padding-inline: 16px;
+}
+
+.voucher-message {
+    margin-top: 8px;
+    font-size: 13px;
+    min-height: 18px;
+}
+
+.voucher-summary {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #cbd5e1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.voucher-summary .label {
+    font-weight: 600;
+}
+
+.voucher-summary .value {
+    font-weight: 700;
+    color: #b91c1c;
+}
+
 .payment-info-box {
     background: #f8f9fa;
     border-radius: 12px;
